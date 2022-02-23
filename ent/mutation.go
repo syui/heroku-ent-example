@@ -12,22 +12,20 @@ import (
 	"sync"
 
 	"entgo.io/ent"
+	"time"
 )
 
 const (
-	// Operation types.
 	OpCreate    = ent.OpCreate
 	OpDelete    = ent.OpDelete
 	OpDeleteOne = ent.OpDeleteOne
 	OpUpdate    = ent.OpUpdate
 	OpUpdateOne = ent.OpUpdateOne
 
-	// Node types.
 	TypePet  = "Pet"
 	TypeUser = "User"
 )
 
-// PetMutation represents an operation that mutates the Pet nodes in the graph.
 type PetMutation struct {
 	config
 	op            Op
@@ -43,6 +41,7 @@ type PetMutation struct {
 	oldValue      func(context.Context) (*Pet, error)
 	predicates    []predicate.Pet
 }
+
 
 var _ ent.Mutation = (*PetMutation)(nil)
 
@@ -156,9 +155,6 @@ func (m *PetMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old "name" field's value of the Pet entity.
-// If the Pet object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *PetMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldName is only allowed on UpdateOne operations")
@@ -173,18 +169,15 @@ func (m *PetMutation) OldName(ctx context.Context) (v string, err error) {
 	return oldValue.Name, nil
 }
 
-// ResetName resets all changes to the "name" field.
 func (m *PetMutation) ResetName() {
 	m.name = nil
 }
 
-// SetAge sets the "age" field.
 func (m *PetMutation) SetAge(i int) {
 	m.age = &i
 	m.addage = nil
 }
 
-// Age returns the value of the "age" field in the mutation.
 func (m *PetMutation) Age() (r int, exists bool) {
 	v := m.age
 	if v == nil {
@@ -193,9 +186,6 @@ func (m *PetMutation) Age() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old "age" field's value of the Pet entity.
-// If the Pet object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *PetMutation) OldAge(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAge is only allowed on UpdateOne operations")
@@ -210,7 +200,6 @@ func (m *PetMutation) OldAge(ctx context.Context) (v int, err error) {
 	return oldValue.Age, nil
 }
 
-// AddAge adds i to the "age" field.
 func (m *PetMutation) AddAge(i int) {
 	if m.addage != nil {
 		*m.addage += i
@@ -219,7 +208,6 @@ func (m *PetMutation) AddAge(i int) {
 	}
 }
 
-// AddedAge returns the value that was added to the "age" field in this mutation.
 func (m *PetMutation) AddedAge() (r int, exists bool) {
 	v := m.addage
 	if v == nil {
@@ -228,28 +216,23 @@ func (m *PetMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge resets all changes to the "age" field.
 func (m *PetMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
 }
 
-// SetOwnerID sets the "owner" edge to the User entity by id.
 func (m *PetMutation) SetOwnerID(id int) {
 	m.owner = &id
 }
 
-// ClearOwner clears the "owner" edge to the User entity.
 func (m *PetMutation) ClearOwner() {
 	m.clearedowner = true
 }
 
-// OwnerCleared reports if the "owner" edge to the User entity was cleared.
 func (m *PetMutation) OwnerCleared() bool {
 	return m.clearedowner
 }
 
-// OwnerID returns the "owner" edge ID in the mutation.
 func (m *PetMutation) OwnerID() (id int, exists bool) {
 	if m.owner != nil {
 		return *m.owner, true
@@ -257,9 +240,6 @@ func (m *PetMutation) OwnerID() (id int, exists bool) {
 	return
 }
 
-// OwnerIDs returns the "owner" edge IDs in the mutation.
-// Note that IDs always returns len(IDs) <= 1 for unique edges, and you should use
-// OwnerID instead. It exists only for internal usage by the builders.
 func (m *PetMutation) OwnerIDs() (ids []int) {
 	if id := m.owner; id != nil {
 		ids = append(ids, *id)
@@ -267,7 +247,6 @@ func (m *PetMutation) OwnerIDs() (ids []int) {
 	return
 }
 
-// ResetOwner resets all changes to the "owner" edge.
 func (m *PetMutation) ResetOwner() {
 	m.owner = nil
 	m.clearedowner = false
@@ -278,19 +257,15 @@ func (m *PetMutation) Where(ps ...predicate.Pet) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// Op returns the operation name.
 func (m *PetMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (Pet).
 func (m *PetMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
+
 func (m *PetMutation) Fields() []string {
 	fields := make([]string, 0, 2)
 	if m.name != nil {
@@ -513,6 +488,10 @@ type UserMutation struct {
 	done          bool
 	oldValue      func(context.Context) (*User, error)
 	predicates    []predicate.User
+	card          *int
+	addcard							*int
+	created_at    *time.Time
+	updated_at    *time.Time
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -655,7 +634,73 @@ func (m *UserMutation) SetAge(i int) {
 	m.addage = nil
 }
 
-// Age returns the value of the "age" field in the mutation.
+func (m *UserMutation) SetCard(i int) {
+	m.card = &i
+	m.addcard = nil
+}
+
+func (m *UserMutation) SetCreatedAt(t time.Time) {
+	m.created_at = &t
+}
+
+func (m *UserMutation) CreatedAt() (r time.Time, exists bool) {
+	v := m.created_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+func (m *UserMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldCreatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
+	}
+	return oldValue.CreatedAt, nil
+}
+
+func (m *UserMutation) ResetCreatedAt() {
+	m.created_at = nil
+}
+
+func (m *UserMutation) SetUpdatedAt(t time.Time) {
+	m.updated_at = &t
+}
+
+func (m *UserMutation) UpdatedAt() (r time.Time, exists bool) {
+	v := m.updated_at
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+
+func (m *UserMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldUpdatedAt is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
+	}
+	return oldValue.UpdatedAt, nil
+}
+
+// ResetUpdatedAt resets all changes to the "updated_at" field.
+func (m *UserMutation) ResetUpdatedAt() {
+	m.updated_at = nil
+}
+
 func (m *UserMutation) Age() (r int, exists bool) {
 	v := m.age
 	if v == nil {
@@ -664,9 +709,6 @@ func (m *UserMutation) Age() (r int, exists bool) {
 	return *v, true
 }
 
-// OldAge returns the old "age" field's value of the User entity.
-// If the User object wasn't provided to the builder, the object is fetched from the database.
-// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
 func (m *UserMutation) OldAge(ctx context.Context) (v int, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, errors.New("OldAge is only allowed on UpdateOne operations")
@@ -690,7 +732,6 @@ func (m *UserMutation) AddAge(i int) {
 	}
 }
 
-// AddedAge returns the value that was added to the "age" field in this mutation.
 func (m *UserMutation) AddedAge() (r int, exists bool) {
 	v := m.addage
 	if v == nil {
@@ -699,13 +740,11 @@ func (m *UserMutation) AddedAge() (r int, exists bool) {
 	return *v, true
 }
 
-// ResetAge resets all changes to the "age" field.
 func (m *UserMutation) ResetAge() {
 	m.age = nil
 	m.addage = nil
 }
 
-// AddPetIDs adds the "pets" edge to the Pet entity by ids.
 func (m *UserMutation) AddPetIDs(ids ...int) {
 	if m.pets == nil {
 		m.pets = make(map[int]struct{})
@@ -715,17 +754,14 @@ func (m *UserMutation) AddPetIDs(ids ...int) {
 	}
 }
 
-// ClearPets clears the "pets" edge to the Pet entity.
 func (m *UserMutation) ClearPets() {
 	m.clearedpets = true
 }
 
-// PetsCleared reports if the "pets" edge to the Pet entity was cleared.
 func (m *UserMutation) PetsCleared() bool {
 	return m.clearedpets
 }
 
-// RemovePetIDs removes the "pets" edge to the Pet entity by IDs.
 func (m *UserMutation) RemovePetIDs(ids ...int) {
 	if m.removedpets == nil {
 		m.removedpets = make(map[int]struct{})
@@ -736,7 +772,6 @@ func (m *UserMutation) RemovePetIDs(ids ...int) {
 	}
 }
 
-// RemovedPets returns the removed IDs of the "pets" edge to the Pet entity.
 func (m *UserMutation) RemovedPetsIDs() (ids []int) {
 	for id := range m.removedpets {
 		ids = append(ids, id)
@@ -744,7 +779,6 @@ func (m *UserMutation) RemovedPetsIDs() (ids []int) {
 	return
 }
 
-// PetsIDs returns the "pets" edge IDs in the mutation.
 func (m *UserMutation) PetsIDs() (ids []int) {
 	for id := range m.pets {
 		ids = append(ids, id)
@@ -752,31 +786,24 @@ func (m *UserMutation) PetsIDs() (ids []int) {
 	return
 }
 
-// ResetPets resets all changes to the "pets" edge.
 func (m *UserMutation) ResetPets() {
 	m.pets = nil
 	m.clearedpets = false
 	m.removedpets = nil
 }
 
-// Where appends a list predicates to the UserMutation builder.
 func (m *UserMutation) Where(ps ...predicate.User) {
 	m.predicates = append(m.predicates, ps...)
 }
 
-// Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (User).
 func (m *UserMutation) Type() string {
 	return m.typ
 }
 
-// Fields returns all fields that were changed during this mutation. Note that in
-// order to get all numeric fields that were incremented/decremented, call
-// AddedFields().
 func (m *UserMutation) Fields() []string {
 	fields := make([]string, 0, 2)
 	if m.name != nil {
@@ -788,9 +815,6 @@ func (m *UserMutation) Fields() []string {
 	return fields
 }
 
-// Field returns the value of a field with the given name. The second boolean
-// return value indicates that this field was not set, or was not defined in the
-// schema.
 func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	switch name {
 	case user.FieldName:
@@ -801,9 +825,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 	return nil, false
 }
 
-// OldField returns the old value of the field from the database. An error is
-// returned if the mutation operation is not UpdateOne, or the query to the
-// database failed.
 func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
 	case user.FieldName:
@@ -814,9 +835,6 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
 
-// SetField sets the value of a field with the given name. It returns an error if
-// the field is not defined in the schema, or if the type mismatched the field
-// type.
 func (m *UserMutation) SetField(name string, value ent.Value) error {
 	switch name {
 	case user.FieldName:
@@ -990,3 +1008,5 @@ func (m *UserMutation) ResetEdge(name string) error {
 	}
 	return fmt.Errorf("unknown User edge %s", name)
 }
+
+

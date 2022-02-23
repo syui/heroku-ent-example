@@ -356,7 +356,7 @@ func (pq *PetQuery) sqlAll(ctx context.Context) ([]*Pet, error) {
 		}
 	)
 	if pq.withOwner != nil {
-		withFKs = true
+		withFKs = false
 	}
 	if withFKs {
 		_spec.Node.Columns = append(_spec.Node.Columns, pet.ForeignKeys...)

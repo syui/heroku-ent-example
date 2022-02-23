@@ -15,14 +15,15 @@ type User struct {
 	config `json:"-"`
 	ID int `json:"id,omitempty"`
 	Name string `json:"name,omitempty"`
-	Age int `json:"age,omitempty"`
+	Age int `json:"age"`
+	Card int `json:"card"`
 	Edges UserEdges `json:"edges"`
-	UpdatedAt time.Time
-	CreatedAt time.Time
+	CreatedAt time.Time `json:"created_at,omitempty"`
+	UpdatedAt time.Time `json:"updated_at,omitempty"`
 }
 
 type UserEdges struct {
-	Pets []*Pet `json:"pets,omitempty"`
+	Pets []*Pet `json:"pets"`
 	loadedTypes [1]bool
 }
 
@@ -37,10 +38,12 @@ func (*User) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
-		case user.FieldID, user.FieldAge:
+		case user.FieldID:
 			values[i] = new(sql.NullInt64)
 		case user.FieldName:
 			values[i] = new(sql.NullString)
+		case user.FieldCreatedAt, user.FieldUpdatedAt:
+			values[i] = &sql.NullTime{}
 		default:
 			return nil, fmt.Errorf("unexpected column %q for type User", columns[i])
 		}
@@ -72,6 +75,18 @@ func (u *User) assignValues(columns []string, values []interface{}) error {
 			} else if value.Valid {
 				u.Age = int(value.Int64)
 			}
+	case user.FieldCreatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field created_at", values[i])
+			} else if value.Valid {
+				u.CreatedAt = value.Time
+			}
+		case user.FieldUpdatedAt:
+			if value, ok := values[i].(*sql.NullTime); !ok {
+				return fmt.Errorf("unexpected type %T for field updated_at", values[i])
+			} else if value.Valid {
+				u.UpdatedAt = value.Time
+			}
 		}
 	}
 	return nil
@@ -102,6 +117,10 @@ func (u *User) String() string {
 	builder.WriteString(u.Name)
 	builder.WriteString(", age=")
 	builder.WriteString(fmt.Sprintf("%v", u.Age))
+	builder.WriteString(", created_at=")
+	builder.WriteString(u.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(", updated_at=")
+	builder.WriteString(u.UpdatedAt.Format(time.ANSIC))
 	builder.WriteByte(')')
 	return builder.String()
 }

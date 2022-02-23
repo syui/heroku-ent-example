@@ -12,9 +12,9 @@ import (
 	"entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect/sql/sqlgraph"
 	"entgo.io/ent/schema/field"
+	"time"
 )
 
-// UserCreate is the builder for creating a User entity.
 type UserCreate struct {
 	config
 	mutation *UserMutation
@@ -22,25 +22,49 @@ type UserCreate struct {
 	conflict []sql.ConflictOption
 }
 
-// SetName sets the "name" field.
 func (uc *UserCreate) SetName(s string) *UserCreate {
 	uc.mutation.SetName(s)
 	return uc
 }
 
-// SetAge sets the "age" field.
+func (uc *UserCreate) SetCreatedAt(t time.Time) *UserCreate {
+	uc.mutation.SetCreatedAt(t)
+	return uc
+}
+
+func (uc *UserCreate) SetUpdatedAt(t time.Time) *UserCreate {
+	uc.mutation.SetUpdatedAt(t)
+	return uc
+}
+
+func (uc *UserCreate) SetNillableUpdatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetUpdatedAt(*t)
+	}
+	return uc
+}
+
+func (uc *UserCreate) SetNillableCreatedAt(t *time.Time) *UserCreate {
+	if t != nil {
+		uc.SetCreatedAt(*t)
+	}
+	return uc
+}
+
 func (uc *UserCreate) SetAge(i int) *UserCreate {
 	uc.mutation.SetAge(i)
 	return uc
 }
+func (uc *UserCreate) SetCard(i int) *UserCreate {
+	uc.mutation.SetCard(i)
+	return uc
+}
 
-// AddPetIDs adds the "pets" edge to the Pet entity by IDs.
 func (uc *UserCreate) AddPetIDs(ids ...int) *UserCreate {
 	uc.mutation.AddPetIDs(ids...)
 	return uc
 }
 
-// AddPets adds the "pets" edges to the Pet entity.
 func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	ids := make([]int, len(p))
 	for i := range p {
@@ -49,12 +73,10 @@ func (uc *UserCreate) AddPets(p ...*Pet) *UserCreate {
 	return uc.AddPetIDs(ids...)
 }
 
-// Mutation returns the UserMutation object of the builder.
 func (uc *UserCreate) Mutation() *UserMutation {
 	return uc.mutation
 }
 
-// Save creates the User in the database.
 func (uc *UserCreate) Save(ctx context.Context) (*User, error) {
 	var (
 		err  error
@@ -117,14 +139,13 @@ func (uc *UserCreate) ExecX(ctx context.Context) {
 	}
 }
 
-// check runs all checks and user-defined validators on the builder.
 func (uc *UserCreate) check() error {
 	if _, ok := uc.mutation.Name(); !ok {
 		return &ValidationError{Name: "name", err: errors.New(`ent: missing required field "User.name"`)}
 	}
-	if _, ok := uc.mutation.Age(); !ok {
-		return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
-	}
+	//if _, ok := uc.mutation.Age(); !ok {
+	//	return &ValidationError{Name: "age", err: errors.New(`ent: missing required field "User.age"`)}
+	//}
 	return nil
 }
 
@@ -242,45 +263,31 @@ type (
 	}
 )
 
-// SetName sets the "name" field.
 func (u *UserUpsert) SetName(v string) *UserUpsert {
 	u.Set(user.FieldName, v)
 	return u
 }
 
-// UpdateName sets the "name" field to the value that was provided on create.
 func (u *UserUpsert) UpdateName() *UserUpsert {
 	u.SetExcluded(user.FieldName)
 	return u
 }
 
-// SetAge sets the "age" field.
 func (u *UserUpsert) SetAge(v int) *UserUpsert {
 	u.Set(user.FieldAge, v)
 	return u
 }
 
-// UpdateAge sets the "age" field to the value that was provided on create.
 func (u *UserUpsert) UpdateAge() *UserUpsert {
 	u.SetExcluded(user.FieldAge)
 	return u
 }
 
-// AddAge adds v to the "age" field.
 func (u *UserUpsert) AddAge(v int) *UserUpsert {
 	u.Add(user.FieldAge, v)
 	return u
 }
 
-// UpdateNewValues updates the mutable fields using the new values that were set on create.
-// Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-//
 func (u *UserUpsertOne) UpdateNewValues() *UserUpsertOne {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
@@ -328,28 +335,24 @@ func (u *UserUpsertOne) UpdateName() *UserUpsertOne {
 	})
 }
 
-// SetAge sets the "age" field.
 func (u *UserUpsertOne) SetAge(v int) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.SetAge(v)
 	})
 }
 
-// AddAge adds v to the "age" field.
 func (u *UserUpsertOne) AddAge(v int) *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.AddAge(v)
 	})
 }
 
-// UpdateAge sets the "age" field to the value that was provided on create.
 func (u *UserUpsertOne) UpdateAge() *UserUpsertOne {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateAge()
 	})
 }
 
-// Exec executes the query.
 func (u *UserUpsertOne) Exec(ctx context.Context) error {
 	if len(u.create.conflict) == 0 {
 		return errors.New("ent: missing options for UserCreate.OnConflict")
@@ -357,7 +360,6 @@ func (u *UserUpsertOne) Exec(ctx context.Context) error {
 	return u.create.Exec(ctx)
 }
 
-// ExecX is like Exec, but panics if an error occurs.
 func (u *UserUpsertOne) ExecX(ctx context.Context) {
 	if err := u.create.Exec(ctx); err != nil {
 		panic(err)
@@ -373,7 +375,6 @@ func (u *UserUpsertOne) ID(ctx context.Context) (id int, err error) {
 	return node.ID, nil
 }
 
-// IDX is like ID, but panics if an error occurs.
 func (u *UserUpsertOne) IDX(ctx context.Context) int {
 	id, err := u.ID(ctx)
 	if err != nil {
@@ -382,7 +383,6 @@ func (u *UserUpsertOne) IDX(ctx context.Context) int {
 	return id
 }
 
-// UserCreateBulk is the builder for creating many User entities in bulk.
 type UserCreateBulk struct {
 	config
 	builders []*UserCreate
@@ -413,7 +413,6 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 				} else {
 					spec := &sqlgraph.BatchCreateSpec{Nodes: specs}
 					spec.OnConflict = ucb.conflict
-					// Invoke the actual operation on the latest mutation in the chain.
 					if err = sqlgraph.BatchCreate(ctx, ucb.driver, spec); err != nil {
 						if sqlgraph.IsConstraintError(err) {
 							err = &ConstraintError{err.Error(), err}
@@ -445,7 +444,6 @@ func (ucb *UserCreateBulk) Save(ctx context.Context) ([]*User, error) {
 	return nodes, nil
 }
 
-// SaveX is like Save, but panics if an error occurs.
 func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	v, err := ucb.Save(ctx)
 	if err != nil {
@@ -454,35 +452,17 @@ func (ucb *UserCreateBulk) SaveX(ctx context.Context) []*User {
 	return v
 }
 
-// Exec executes the query.
 func (ucb *UserCreateBulk) Exec(ctx context.Context) error {
 	_, err := ucb.Save(ctx)
 	return err
 }
 
-// ExecX is like Exec, but panics if an error occurs.
 func (ucb *UserCreateBulk) ExecX(ctx context.Context) {
 	if err := ucb.Exec(ctx); err != nil {
 		panic(err)
 	}
 }
 
-// OnConflict allows configuring the `ON CONFLICT` / `ON DUPLICATE KEY` clause
-// of the `INSERT` statement. For example:
-//
-//	client.User.CreateBulk(builders...).
-//		OnConflict(
-//			// Update the row with the new values
-//			// the was proposed for insertion.
-//			sql.ResolveWithNewValues(),
-//		).
-//		// Override some of the fields with custom
-//		// update values.
-//		Update(func(u *ent.UserUpsert) {
-//			SetName(v+v).
-//		}).
-//		Exec(ctx)
-//
 func (ucb *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBulk {
 	ucb.conflict = opts
 	return &UserUpsertBulk{
@@ -490,13 +470,6 @@ func (ucb *UserCreateBulk) OnConflict(opts ...sql.ConflictOption) *UserUpsertBul
 	}
 }
 
-// OnConflictColumns calls `OnConflict` and configures the columns
-// as conflict target. Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(sql.ConflictColumns(columns...)).
-//		Exec(ctx)
-//
 func (ucb *UserCreateBulk) OnConflictColumns(columns ...string) *UserUpsertBulk {
 	ucb.conflict = append(ucb.conflict, sql.ConflictColumns(columns...))
 	return &UserUpsertBulk{
@@ -504,47 +477,25 @@ func (ucb *UserCreateBulk) OnConflictColumns(columns ...string) *UserUpsertBulk 
 	}
 }
 
-// UserUpsertBulk is the builder for "upsert"-ing
-// a bulk of User nodes.
 type UserUpsertBulk struct {
 	create *UserCreateBulk
 }
 
-// UpdateNewValues updates the mutable fields using the new values that
-// were set on create. Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(
-//			sql.ResolveWithNewValues(),
-//		).
-//		Exec(ctx)
-//
 func (u *UserUpsertBulk) UpdateNewValues() *UserUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithNewValues())
 	return u
 }
 
-// Ignore sets each column to itself in case of conflict.
-// Using this option is equivalent to using:
-//
-//	client.User.Create().
-//		OnConflict(sql.ResolveWithIgnore()).
-//		Exec(ctx)
-//
 func (u *UserUpsertBulk) Ignore() *UserUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWithIgnore())
 	return u
 }
 
-// DoNothing configures the conflict_action to `DO NOTHING`.
-// Supported only by SQLite and PostgreSQL.
 func (u *UserUpsertBulk) DoNothing() *UserUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.DoNothing())
 	return u
 }
 
-// Update allows overriding fields `UPDATE` values. See the UserCreateBulk.OnConflict
-// documentation for more info.
 func (u *UserUpsertBulk) Update(set func(*UserUpsert)) *UserUpsertBulk {
 	u.create.conflict = append(u.create.conflict, sql.ResolveWith(func(update *sql.UpdateSet) {
 		set(&UserUpsert{UpdateSet: update})
@@ -552,42 +503,36 @@ func (u *UserUpsertBulk) Update(set func(*UserUpsert)) *UserUpsertBulk {
 	return u
 }
 
-// SetName sets the "name" field.
 func (u *UserUpsertBulk) SetName(v string) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetName(v)
 	})
 }
 
-// UpdateName sets the "name" field to the value that was provided on create.
 func (u *UserUpsertBulk) UpdateName() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateName()
 	})
 }
 
-// SetAge sets the "age" field.
 func (u *UserUpsertBulk) SetAge(v int) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.SetAge(v)
 	})
 }
 
-// AddAge adds v to the "age" field.
 func (u *UserUpsertBulk) AddAge(v int) *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.AddAge(v)
 	})
 }
 
-// UpdateAge sets the "age" field to the value that was provided on create.
 func (u *UserUpsertBulk) UpdateAge() *UserUpsertBulk {
 	return u.Update(func(s *UserUpsert) {
 		s.UpdateAge()
 	})
 }
 
-// Exec executes the query.
 func (u *UserUpsertBulk) Exec(ctx context.Context) error {
 	for i, b := range u.create.builders {
 		if len(b.conflict) != 0 {

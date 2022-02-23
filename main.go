@@ -48,9 +48,9 @@ func main() {
 	}
 	log.Println(users)
 	r, l, v := chi.NewRouter(), zap.NewExample(), validator.New()
-	r.Route("/pets", func(r chi.Router) {
-		elk.NewPetHandler(c, l, v).Mount(r, elk.PetRoutes)
-	})
+	//r.Route("/pets", func(r chi.Router) {
+	//	elk.NewPetHandler(c, l, v).Mount(r, elk.PetRoutes)
+	//})
 	r.Route("/users", func(r chi.Router) {
 		elk.NewUserHandler(c, l, v).Mount(r, elk.UserRoutes)
 	})

@@ -13,26 +13,26 @@ import (
 	"github.com/liip/sheriff"
 	"github.com/masseelch/render"
 	"go.uber.org/zap"
+	"time"
+	//"math/rand"
 )
+var layout = "2006-01-02 15:04:05"
 
-// Payload of a ent.Pet create request.
 type PetCreateRequest struct {
 	Name  *string `json:"name"`
-	Age   *int    `json:"age" validate:"required,gt=0"`
+	Age   *int    `json:"age"`
+	//Age   *int    `json:"age" validate:"required,gt=0"`
 	Owner *int    `json:"owner" validate:"required"`
 }
 
-// Create creates a new ent.Pet and stores it in the database.
 func (h PetHandler) Create(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "Create"))
-	// Get the post data.
 	var d PetCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
 		l.Error("error decoding json", zap.Error(err))
 		render.BadRequest(w, r, "invalid json string")
 		return
 	}
-	// Validate the data.
 	if err := h.validator.Struct(d); err != nil {
 		if err, ok := err.(*validator.InvalidValidationError); ok {
 			l.Error("error validating request data", zap.Error(err))
@@ -45,26 +45,21 @@ func (h PetHandler) Create(w http.ResponseWriter, r *http.Request) {
 	}
 	// Save the data.
 	b := h.client.Pet.Create()
-	// TODO: what about slice fields that have custom marshallers?
 	if d.Name != nil {
 		b.SetName(*d.Name).OnConflict()
-		//.OnConflictColumns(user.FieldName)
 	}
 	if d.Age != nil {
 		b.SetAge(*d.Age)
 	}
 	if d.Owner != nil {
 		b.SetOwnerID(*d.Owner)
-
 	}
-	// Store in database.
 	e, err := b.Save(r.Context())
 	if err != nil {
 		l.Error("error saving pet", zap.Error(err))
 		render.InternalServerError(w, r, nil)
 		return
 	}
-	// Reload entry.
 	q := h.client.Pet.Query().Where(pet.ID(e.ID))
 	e, err = q.Only(r.Context())
 	if err != nil {
@@ -92,24 +87,25 @@ func (h PetHandler) Create(w http.ResponseWriter, r *http.Request) {
 	render.OK(w, r, j)
 }
 
-// Payload of a ent.User create request.
 type UserCreateRequest struct {
-	Name *string `json:"name"`
+	Name *string `json:"name" validate:"required"`
 	Age  *int    `json:"age"`
+	Card  *int    `json:"card"`
+	//CreatedAt time `json:"created_at,omitempty"`
+	//UpdatedAt time `json:"updated_at,omitempty"`
+	CreatedAt time.Time
+	UpdatedAt time.Time
 	Pets []int   `json:"pets"`
 }
 
-// Create creates a new ent.User and stores it in the database.
 func (h UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "Create"))
-	// Get the post data.
 	var d UserCreateRequest
 	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
 		l.Error("error decoding json", zap.Error(err))
 		render.BadRequest(w, r, "invalid json string")
 		return
 	}
-	// Validate the data.
 	if err := h.validator.Struct(d); err != nil {
 		if err, ok := err.(*validator.InvalidValidationError); ok {
 			l.Error("error validating request data", zap.Error(err))
@@ -120,27 +116,28 @@ func (h UserHandler) Create(w http.ResponseWriter, r *http.Request) {
 		render.BadRequest(w, r, err)
 		return
 	}
-	// Save the data.
 	b := h.client.User.Create()
-	// TODO: what about slice fields that have custom marshallers?
 	if d.Name != nil {
 		b.SetName(*d.Name).OnConflict()
-		//b.SetName(*d.Name).OnConflictColumns(user.FieldName)
 	}
 	if d.Age != nil {
 		b.SetAge(*d.Age)
 	}
+
 	if d.Pets != nil {
 		b.AddPetIDs(d.Pets...)
 	}
-	// Store in database.
+
+	//r = rand.Intn(20)
+	//b.Card(*d.r)
+	//b.SetUpdatedAt(time.Now)
+	//b.SetCreatedAt(time.Now)
 	e, err := b.Save(r.Context())
 	if err != nil {
 		l.Error("error saving user", zap.Error(err))
 		render.InternalServerError(w, r, nil)
 		return
 	}
-	// Reload entry.
 	q := h.client.User.Query().Where(user.ID(e.ID))
 	e, err = q.Only(r.Context())
 	if err != nil {
