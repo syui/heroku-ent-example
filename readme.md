@@ -15,3 +15,9 @@ $ heroku logs
 ```sh
 $ curl "https://$APP.herokuapp.com/users/"
 ```
+
+ref : 
+
+- https://github.com/ent/ent/blob/master/dialect/sql/schema/postgres_test.go
+
+- https://github.com/go-kratos/beer-shop/tree/main/app/catalog/service/internal/data/ent
