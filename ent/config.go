@@ -7,20 +7,28 @@ import (
 	"entgo.io/ent/dialect"
 )
 
+// Option function to configure the client.
 type Option func(*config)
 
+// Config is the configuration for the client and its builder.
 type config struct {
+	// driver used for executing database requests.
 	driver dialect.Driver
+	// debug enable a debug logging.
 	debug bool
+	// log used for logging on debug mode.
 	log func(...interface{})
+	// hooks to execute on mutations.
 	hooks *hooks
 }
 
+// hooks per client, for fast access.
 type hooks struct {
-	Pet  []ent.Hook
-	User []ent.Hook
+	Todo  []ent.Hook
+	Users []ent.Hook
 }
 
+// Options applies the options on the config object.
 func (c *config) options(opts ...Option) {
 	for _, opt := range opts {
 		opt(c)
@@ -30,6 +38,7 @@ func (c *config) options(opts ...Option) {
 	}
 }
 
+// Debug enables debug logging on the ent.Driver.
 func Debug() Option {
 	return func(c *config) {
 		c.debug = true

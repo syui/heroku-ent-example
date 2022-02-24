@@ -3,164 +3,222 @@
 package http
 
 import (
-	"heroku-ent-example/ent"
-	"heroku-ent-example/ent/pet"
-	"heroku-ent-example/ent/user"
-	"encoding/json"
 	"net/http"
+	"strings"
+	"t/ent"
+	"t/ent/compartment"
+	"t/ent/entry"
+	"t/ent/fridge"
+	"t/ent/item"
 
-	"github.com/go-playground/validator/v10"
-	"github.com/liip/sheriff"
-	"github.com/masseelch/render"
+	"github.com/mailru/easyjson"
 	"go.uber.org/zap"
-	"time"
-	//"math/rand"
 )
-var layout = "2006-01-02 15:04:05"
 
-type PetCreateRequest struct {
-	Name  *string `json:"name"`
-	Age   *int    `json:"age"`
-	//Age   *int    `json:"age" validate:"required,gt=0"`
-	Owner *int    `json:"owner" validate:"required"`
-}
-
-func (h PetHandler) Create(w http.ResponseWriter, r *http.Request) {
+// Create creates a new ent.Compartment and stores it in the database.
+func (h CompartmentHandler) Create(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "Create"))
-	var d PetCreateRequest
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+	// Get the post data.
+	var d CompartmentCreateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
 		l.Error("error decoding json", zap.Error(err))
-		render.BadRequest(w, r, "invalid json string")
-		return
-	}
-	if err := h.validator.Struct(d); err != nil {
-		if err, ok := err.(*validator.InvalidValidationError); ok {
-			l.Error("error validating request data", zap.Error(err))
-			render.InternalServerError(w, r, nil)
-			return
-		}
-		l.Info("validation failed", zap.Error(err))
-		render.BadRequest(w, r, err)
+		BadRequest(w, "invalid json string")
 		return
 	}
 	// Save the data.
-	b := h.client.Pet.Create()
-	if d.Name != nil {
-		b.SetName(*d.Name).OnConflict()
-	}
-	if d.Age != nil {
-		b.SetAge(*d.Age)
-	}
-	if d.Owner != nil {
-		b.SetOwnerID(*d.Owner)
-	}
+	b := h.client.Compartment.Create()
 	e, err := b.Save(r.Context())
 	if err != nil {
-		l.Error("error saving pet", zap.Error(err))
-		render.InternalServerError(w, r, nil)
+		switch {
+		default:
+			l.Error("could not create compartment", zap.Error(err))
+			InternalServerError(w, nil)
+		}
 		return
 	}
-	q := h.client.Pet.Query().Where(pet.ID(e.ID))
-	e, err = q.Only(r.Context())
+	// Store id of fresh entity to log errors for the reload.
+	id := e.ID
+	// Reload entry.
+	q := h.client.Compartment.Query().Where(compartment.ID(e.ID))
+	ret, err := q.Only(r.Context())
 	if err != nil {
 		switch {
 		case ent.IsNotFound(err):
 			msg := stripEntError(err)
-			l.Info(msg, zap.Int("id", e.ID), zap.Error(err))
-			render.NotFound(w, r, msg)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
 		default:
-			l.Error("error fetching pet from db", zap.Int("id", e.ID), zap.Error(err))
-			render.InternalServerError(w, r, nil)
+			l.Error("could not read compartment", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
 		}
 		return
 	}
-	j, err := sheriff.Marshal(&sheriff.Options{
-		IncludeEmptyTag: true,
-		Groups:          []string{"pet"},
-	}, e)
-	if err != nil {
-		l.Error("serialization error", zap.Int("id", e.ID), zap.Error(err))
-		render.InternalServerError(w, r, nil)
-		return
-	}
-	l.Info("pet rendered", zap.Int("id", e.ID))
-	render.OK(w, r, j)
+	l.Info("compartment rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewCompartment3324871446View(ret), w)
 }
 
-type UserCreateRequest struct {
-	Name *string `json:"name" validate:"required"`
-	Age  *int    `json:"age"`
-	Card  *int    `json:"card"`
-	//CreatedAt time `json:"created_at,omitempty"`
-	//UpdatedAt time `json:"updated_at,omitempty"`
-	CreatedAt time.Time
-	UpdatedAt time.Time
-	Pets []int   `json:"pets"`
-}
-
-func (h UserHandler) Create(w http.ResponseWriter, r *http.Request) {
+// Create creates a new ent.Entry and stores it in the database.
+func (h EntryHandler) Create(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "Create"))
-	var d UserCreateRequest
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+	// Get the post data.
+	var d EntryCreateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
 		l.Error("error decoding json", zap.Error(err))
-		render.BadRequest(w, r, "invalid json string")
+		BadRequest(w, "invalid json string")
 		return
 	}
-	if err := h.validator.Struct(d); err != nil {
-		if err, ok := err.(*validator.InvalidValidationError); ok {
-			l.Error("error validating request data", zap.Error(err))
-			render.InternalServerError(w, r, nil)
-			return
-		}
-		l.Info("validation failed", zap.Error(err))
-		render.BadRequest(w, r, err)
+	// Validate the data.
+	errs := make(map[string]string)
+	if d.User == nil {
+		errs["user"] = `missing required field: "user"`
+	} else if err := entry.UserValidator(*d.User); err != nil {
+		errs["user"] = strings.TrimPrefix(err.Error(), "entry: ")
+	}
+	if d.First == nil {
+		errs["first"] = `missing required field: "first"`
+	}
+	if len(errs) > 0 {
+		l.Info("validation failed", zapFields(errs)...)
+		BadRequest(w, errs)
 		return
 	}
-	b := h.client.User.Create()
-	if d.Name != nil {
-		b.SetName(*d.Name).OnConflict()
+	// Save the data.
+	b := h.client.Entry.Create()
+	if d.User != nil {
+		b.SetUser(*d.User)
 	}
-	if d.Age != nil {
-		b.SetAge(*d.Age)
+	if d.First != nil {
+		b.SetFirst(*d.First)
 	}
-
-	if d.Pets != nil {
-		b.AddPetIDs(d.Pets...)
+	if d.CreatedAt != nil {
+		b.SetCreatedAt(*d.CreatedAt)
 	}
-
-	//r = rand.Intn(20)
-	//b.Card(*d.r)
-	//b.SetUpdatedAt(time.Now)
-	//b.SetCreatedAt(time.Now)
 	e, err := b.Save(r.Context())
 	if err != nil {
-		l.Error("error saving user", zap.Error(err))
-		render.InternalServerError(w, r, nil)
+		switch {
+		default:
+			l.Error("could not create entry", zap.Error(err))
+			InternalServerError(w, nil)
+		}
 		return
 	}
-	q := h.client.User.Query().Where(user.ID(e.ID))
-	e, err = q.Only(r.Context())
+	// Store id of fresh entity to log errors for the reload.
+	id := e.ID
+	// Reload entry.
+	q := h.client.Entry.Query().Where(entry.ID(e.ID))
+	ret, err := q.Only(r.Context())
 	if err != nil {
 		switch {
 		case ent.IsNotFound(err):
 			msg := stripEntError(err)
-			l.Info(msg, zap.Int("id", e.ID), zap.Error(err))
-			render.NotFound(w, r, msg)
+			l.Info(msg, zap.Error(err), zap.String("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.String("id", id))
+			BadRequest(w, msg)
 		default:
-			l.Error("error fetching user from db", zap.Int("id", e.ID), zap.Error(err))
-			render.InternalServerError(w, r, nil)
+			l.Error("could not read entry", zap.Error(err), zap.String("id", id))
+			InternalServerError(w, nil)
 		}
 		return
 	}
-	j, err := sheriff.Marshal(&sheriff.Options{
-		IncludeEmptyTag: true,
-		Groups:          []string{"user"},
-	}, e)
-	if err != nil {
-		l.Error("serialization error", zap.Int("id", e.ID), zap.Error(err))
-		render.InternalServerError(w, r, nil)
+	l.Info("entry rendered", zap.String("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewEntry2675665849View(ret), w)
+}
+
+// Create creates a new ent.Fridge and stores it in the database.
+func (h FridgeHandler) Create(w http.ResponseWriter, r *http.Request) {
+	l := h.log.With(zap.String("method", "Create"))
+	// Get the post data.
+	var d FridgeCreateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
+		l.Error("error decoding json", zap.Error(err))
+		BadRequest(w, "invalid json string")
 		return
 	}
-	l.Info("user rendered", zap.Int("id", e.ID))
-	render.OK(w, r, j)
+	// Save the data.
+	b := h.client.Fridge.Create()
+	e, err := b.Save(r.Context())
+	if err != nil {
+		switch {
+		default:
+			l.Error("could not create fridge", zap.Error(err))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	// Store id of fresh entity to log errors for the reload.
+	id := e.ID
+	// Reload entry.
+	q := h.client.Fridge.Query().Where(fridge.ID(e.ID))
+	ret, err := q.Only(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
+		default:
+			l.Error("could not read fridge", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	l.Info("fridge rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewFridge2211356377View(ret), w)
+}
+
+// Create creates a new ent.Item and stores it in the database.
+func (h ItemHandler) Create(w http.ResponseWriter, r *http.Request) {
+	l := h.log.With(zap.String("method", "Create"))
+	// Get the post data.
+	var d ItemCreateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
+		l.Error("error decoding json", zap.Error(err))
+		BadRequest(w, "invalid json string")
+		return
+	}
+	// Save the data.
+	b := h.client.Item.Create()
+	e, err := b.Save(r.Context())
+	if err != nil {
+		switch {
+		default:
+			l.Error("could not create item", zap.Error(err))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	// Store id of fresh entity to log errors for the reload.
+	id := e.ID
+	// Reload entry.
+	q := h.client.Item.Query().Where(item.ID(e.ID))
+	ret, err := q.Only(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
+		default:
+			l.Error("could not read item", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	l.Info("item rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewItem1548468123View(ret), w)
 }

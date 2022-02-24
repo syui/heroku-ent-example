@@ -4,9 +4,9 @@ package enttest
 
 import (
 	"context"
-	"heroku-ent-example/ent"
+	"t/ent"
 	// required by schema hooks.
-	_ "heroku-ent-example/ent/runtime"
+	_ "t/ent/runtime"
 
 	"entgo.io/ent/dialect/sql/schema"
 )

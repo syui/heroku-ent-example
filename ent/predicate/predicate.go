@@ -6,8 +6,8 @@ import (
 	"entgo.io/ent/dialect/sql"
 )
 
-// Pet is the predicate function for pet builders.
-type Pet func(*sql.Selector)
+// Todo is the predicate function for todo builders.
+type Todo func(*sql.Selector)
 
-// User is the predicate function for user builders.
-type User func(*sql.Selector)
+// Users is the predicate function for users builders.
+type Users func(*sql.Selector)

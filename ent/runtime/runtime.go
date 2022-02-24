@@ -2,7 +2,7 @@
 
 package runtime
 
-// The schema-stitching logic is generated in heroku-ent-example/ent/runtime.go
+// The schema-stitching logic is generated in t/ent/runtime.go
 
 const (
 	Version = "v0.10.0"                                         // Version of ent codegen.

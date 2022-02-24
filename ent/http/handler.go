@@ -3,120 +3,183 @@
 package http
 
 import (
-	"heroku-ent-example/ent"
 	"strings"
+	"t/ent"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/validator/v10"
 	"go.uber.org/zap"
 )
 
-// handler has some convenience methods used on node-handlers.
-type handler struct{}
-
-// Bitmask to configure which routes to register.
-type Routes uint8
-
-func (rs Routes) has(r Routes) bool { return rs&r != 0 }
-
-const (
-	PetCreate Routes = 1 << iota
-	PetRead
-	PetUpdate
-	PetDelete
-	PetList
-	PetOwner
-	PetRoutes = 1<<iota - 1
-)
-
-// PetHandler handles http crud operations on ent.Pet.
-type PetHandler struct {
-	handler
-
-	client    *ent.Client
-	log       *zap.Logger
-	validator *validator.Validate
+// NewHandler returns a ready to use handler with all generated endpoints mounted.
+func NewHandler(c *ent.Client, l *zap.Logger) chi.Router {
+	r := chi.NewRouter()
+	MountRoutes(c, l, r)
+	return r
 }
 
-func NewPetHandler(c *ent.Client, l *zap.Logger, v *validator.Validate) *PetHandler {
-	return &PetHandler{
-		client:    c,
-		log:       l.With(zap.String("handler", "PetHandler")),
-		validator: v,
-	}
+// MountRoutes mounts all generated routes on the given router.
+func MountRoutes(c *ent.Client, l *zap.Logger, r chi.Router) {
+	NewCompartmentHandler(c, l).MountRoutes(r)
+	NewEntryHandler(c, l).MountRoutes(r)
+	NewFridgeHandler(c, l).MountRoutes(r)
+	NewItemHandler(c, l).MountRoutes(r)
 }
 
-// RegisterHandlers registers the generated handlers on the given chi router.
-func (h *PetHandler) Mount(r chi.Router, rs Routes) {
-	if rs.has(PetCreate) {
-		r.Post("/", h.Create)
-	}
-	if rs.has(PetRead) {
-		r.Get("/{id}", h.Read)
-	}
-	if rs.has(PetUpdate) {
-		r.Patch("/{id}", h.Update)
-	}
-	if rs.has(PetDelete) {
-		r.Delete("/{id}", h.Delete)
-	}
-	if rs.has(PetList) {
-		r.Get("/", h.List)
-	}
-	if rs.has(PetOwner) {
-		r.Get("/{id}/owner", h.Owner)
-	}
+// CompartmentHandler handles http crud operations on ent.Compartment.
+type CompartmentHandler struct {
+	client *ent.Client
+	log    *zap.Logger
 }
 
-const (
-	UserCreate Routes = 1 << iota
-	UserRead
-	UserUpdate
-	UserDelete
-	UserList
-	UserPets
-	UserRoutes = 1<<iota - 1
-)
-
-// UserHandler handles http crud operations on ent.User.
-type UserHandler struct {
-	handler
-
-	client    *ent.Client
-	log       *zap.Logger
-	validator *validator.Validate
-}
-
-func NewUserHandler(c *ent.Client, l *zap.Logger, v *validator.Validate) *UserHandler {
-	return &UserHandler{
-		client:    c,
-		log:       l.With(zap.String("handler", "UserHandler")),
-		validator: v,
+func NewCompartmentHandler(c *ent.Client, l *zap.Logger) *CompartmentHandler {
+	return &CompartmentHandler{
+		client: c,
+		log:    l.With(zap.String("handler", "CompartmentHandler")),
 	}
 }
+func (h *CompartmentHandler) MountCreateRoute(r chi.Router) *CompartmentHandler {
+	r.Post("/compartments", h.Create)
+	return h
+}
+func (h *CompartmentHandler) MountReadRoute(r chi.Router) *CompartmentHandler {
+	r.Get("/compartments/{id}", h.Read)
+	return h
+}
+func (h *CompartmentHandler) MountUpdateRoute(r chi.Router) *CompartmentHandler {
+	r.Patch("/compartments/{id}", h.Update)
+	return h
+}
+func (h *CompartmentHandler) MountDeleteRoute(r chi.Router) *CompartmentHandler {
+	r.Delete("/compartments/{id}", h.Delete)
+	return h
+}
+func (h *CompartmentHandler) MountListRoute(r chi.Router) *CompartmentHandler {
+	r.Get("/compartments", h.List)
+	return h
+}
+func (h *CompartmentHandler) MountRoutes(r chi.Router) {
+	h.MountCreateRoute(r).MountReadRoute(r).MountUpdateRoute(r).MountDeleteRoute(r).MountListRoute(r)
+}
 
-// RegisterHandlers registers the generated handlers on the given chi router.
-func (h *UserHandler) Mount(r chi.Router, rs Routes) {
-	if rs.has(UserCreate) {
-		r.Post("/", h.Create)
+// EntryHandler handles http crud operations on ent.Entry.
+type EntryHandler struct {
+	client *ent.Client
+	log    *zap.Logger
+}
+
+func NewEntryHandler(c *ent.Client, l *zap.Logger) *EntryHandler {
+	return &EntryHandler{
+		client: c,
+		log:    l.With(zap.String("handler", "EntryHandler")),
 	}
-	if rs.has(UserRead) {
-		r.Get("/{id}", h.Read)
+}
+func (h *EntryHandler) MountCreateRoute(r chi.Router) *EntryHandler {
+	r.Post("/entries", h.Create)
+	return h
+}
+func (h *EntryHandler) MountReadRoute(r chi.Router) *EntryHandler {
+	r.Get("/entries/{id}", h.Read)
+	return h
+}
+func (h *EntryHandler) MountUpdateRoute(r chi.Router) *EntryHandler {
+	r.Patch("/entries/{id}", h.Update)
+	return h
+}
+func (h *EntryHandler) MountDeleteRoute(r chi.Router) *EntryHandler {
+	r.Delete("/entries/{id}", h.Delete)
+	return h
+}
+func (h *EntryHandler) MountListRoute(r chi.Router) *EntryHandler {
+	r.Get("/entries", h.List)
+	return h
+}
+func (h *EntryHandler) MountRoutes(r chi.Router) {
+	h.MountCreateRoute(r).MountReadRoute(r).MountUpdateRoute(r).MountDeleteRoute(r).MountListRoute(r)
+}
+
+// FridgeHandler handles http crud operations on ent.Fridge.
+type FridgeHandler struct {
+	client *ent.Client
+	log    *zap.Logger
+}
+
+func NewFridgeHandler(c *ent.Client, l *zap.Logger) *FridgeHandler {
+	return &FridgeHandler{
+		client: c,
+		log:    l.With(zap.String("handler", "FridgeHandler")),
 	}
-	if rs.has(UserUpdate) {
-		r.Patch("/{id}", h.Update)
+}
+func (h *FridgeHandler) MountCreateRoute(r chi.Router) *FridgeHandler {
+	r.Post("/fridges", h.Create)
+	return h
+}
+func (h *FridgeHandler) MountReadRoute(r chi.Router) *FridgeHandler {
+	r.Get("/fridges/{id}", h.Read)
+	return h
+}
+func (h *FridgeHandler) MountUpdateRoute(r chi.Router) *FridgeHandler {
+	r.Patch("/fridges/{id}", h.Update)
+	return h
+}
+func (h *FridgeHandler) MountDeleteRoute(r chi.Router) *FridgeHandler {
+	r.Delete("/fridges/{id}", h.Delete)
+	return h
+}
+func (h *FridgeHandler) MountListRoute(r chi.Router) *FridgeHandler {
+	r.Get("/fridges", h.List)
+	return h
+}
+func (h *FridgeHandler) MountRoutes(r chi.Router) {
+	h.MountCreateRoute(r).MountReadRoute(r).MountUpdateRoute(r).MountDeleteRoute(r).MountListRoute(r)
+}
+
+// ItemHandler handles http crud operations on ent.Item.
+type ItemHandler struct {
+	client *ent.Client
+	log    *zap.Logger
+}
+
+func NewItemHandler(c *ent.Client, l *zap.Logger) *ItemHandler {
+	return &ItemHandler{
+		client: c,
+		log:    l.With(zap.String("handler", "ItemHandler")),
 	}
-	if rs.has(UserDelete) {
-		r.Delete("/{id}", h.Delete)
-	}
-	if rs.has(UserList) {
-		r.Get("/", h.List)
-	}
-	if rs.has(UserPets) {
-		r.Get("/{id}/pets", h.Pets)
-	}
+}
+func (h *ItemHandler) MountCreateRoute(r chi.Router) *ItemHandler {
+	r.Post("/items", h.Create)
+	return h
+}
+func (h *ItemHandler) MountReadRoute(r chi.Router) *ItemHandler {
+	r.Get("/items/{id}", h.Read)
+	return h
+}
+func (h *ItemHandler) MountUpdateRoute(r chi.Router) *ItemHandler {
+	r.Patch("/items/{id}", h.Update)
+	return h
+}
+func (h *ItemHandler) MountDeleteRoute(r chi.Router) *ItemHandler {
+	r.Delete("/items/{id}", h.Delete)
+	return h
+}
+func (h *ItemHandler) MountListRoute(r chi.Router) *ItemHandler {
+	r.Get("/items", h.List)
+	return h
+}
+func (h *ItemHandler) MountRoutes(r chi.Router) {
+	h.MountCreateRoute(r).MountReadRoute(r).MountUpdateRoute(r).MountDeleteRoute(r).MountListRoute(r)
 }
 
 func stripEntError(err error) string {
 	return strings.TrimPrefix(err.Error(), "ent: ")
+}
+
+func zapFields(errs map[string]string) []zap.Field {
+	if errs == nil || len(errs) == 0 {
+		return nil
+	}
+	r := make([]zap.Field, 0)
+	for k, v := range errs {
+		r = append(r, zap.String(k, v))
+	}
+	return r
 }

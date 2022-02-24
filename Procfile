@@ -1,1 +1,1 @@
-web: bin/heroku-ent-example
+web: bin/t

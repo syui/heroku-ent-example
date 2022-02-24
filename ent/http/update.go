@@ -3,199 +3,258 @@
 package http
 
 import (
-	"heroku-ent-example/ent"
-	"heroku-ent-example/ent/pet"
-	"heroku-ent-example/ent/user"
-	"encoding/json"
 	"net/http"
 	"strconv"
+	"t/ent"
+	"t/ent/compartment"
+	"t/ent/entry"
+	"t/ent/fridge"
+	"t/ent/item"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-playground/validator/v10"
-	"github.com/liip/sheriff"
-	"github.com/masseelch/render"
+	"github.com/mailru/easyjson"
 	"go.uber.org/zap"
 )
 
-// Payload of a ent.Pet update request.
-type PetUpdateRequest struct {
-	Name  *string `json:"name"`
-	Age   *int    `json:"age" validate:"required,gt=0"`
-	Owner *int    `json:"owner" validate:"required"`
-}
-
-// Update updates a given ent.Pet and saves the changes to the database.
-func (h PetHandler) Update(w http.ResponseWriter, r *http.Request) {
+// Update updates a given ent.Compartment and saves the changes to the database.
+func (h CompartmentHandler) Update(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "Update"))
 	// ID is URL parameter.
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		l.Error("error getting id from url parameter", zap.String("id", chi.URLParam(r, "id")), zap.Error(err))
-		render.BadRequest(w, r, "id must be an integer greater zero")
+		BadRequest(w, "id must be an integer")
 		return
 	}
 	// Get the post data.
-	var d PetUpdateRequest
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+	var d CompartmentUpdateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
 		l.Error("error decoding json", zap.Error(err))
-		render.BadRequest(w, r, "invalid json string")
-		return
-	}
-	// Validate the data.
-	if err := h.validator.Struct(d); err != nil {
-		if err, ok := err.(*validator.InvalidValidationError); ok {
-			l.Error("error validating request data", zap.Error(err))
-			render.InternalServerError(w, r, nil)
-			return
-		}
-		l.Info("validation failed", zap.Error(err))
-		render.BadRequest(w, r, err)
+		BadRequest(w, "invalid json string")
 		return
 	}
 	// Save the data.
-	b := h.client.Pet.UpdateOneID(id)
-	// TODO: what about slice fields that have custom marshallers?
-	if d.Name != nil {
-		b.SetName(*d.Name)
-	}
-	if d.Age != nil {
-		b.SetAge(*d.Age)
-	}
-	if d.Owner != nil {
-		b.SetOwnerID(*d.Owner)
-
-	}
+	b := h.client.Compartment.UpdateOneID(id)
 	// Store in database.
 	e, err := b.Save(r.Context())
 	if err != nil {
-		switch err.(type) {
-		case *ent.NotFoundError:
-			l.Info("pet not found", zap.Int("id", id), zap.Error(err))
-			render.NotFound(w, r, "pet not found")
-		case *ent.NotSingularError:
-			l.Error("duplicate entry for pet", zap.Int("id", id), zap.Error(err))
-			render.BadRequest(w, r, "duplicate pet entry with id "+strconv.Itoa(e.ID))
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
 		default:
-			l.Error("error saving pet", zap.Int("id", id), zap.Error(err))
-			render.InternalServerError(w, r, nil)
+			l.Error("could-not-update-compartment", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
 		}
 		return
 	}
 	// Reload entry.
-	q := h.client.Pet.Query().Where(pet.ID(e.ID))
+	q := h.client.Compartment.Query().Where(compartment.ID(e.ID))
 	e, err = q.Only(r.Context())
 	if err != nil {
 		switch {
 		case ent.IsNotFound(err):
 			msg := stripEntError(err)
-			l.Info(msg, zap.Int("id", e.ID), zap.Error(err))
-			render.NotFound(w, r, msg)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
 		default:
-			l.Error("error fetching pet from db", zap.Int("id", e.ID), zap.Error(err))
-			render.InternalServerError(w, r, nil)
+			l.Error("could-not-read-compartment", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
 		}
 		return
 	}
-	j, err := sheriff.Marshal(&sheriff.Options{
-		IncludeEmptyTag: true,
-		Groups:          []string{"pet"},
-	}, e)
-	if err != nil {
-		l.Error("serialization error", zap.Int("id", e.ID), zap.Error(err))
-		render.InternalServerError(w, r, nil)
+	l.Info("compartment rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewCompartment3324871446View(e), w)
+}
+
+// Update updates a given ent.Entry and saves the changes to the database.
+func (h EntryHandler) Update(w http.ResponseWriter, r *http.Request) {
+	l := h.log.With(zap.String("method", "Update"))
+	// ID is URL parameter.
+	var err error
+	id := chi.URLParam(r, "id")
+	// Get the post data.
+	var d EntryUpdateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
+		l.Error("error decoding json", zap.Error(err))
+		BadRequest(w, "invalid json string")
 		return
 	}
-	l.Info("pet rendered", zap.Int("id", e.ID))
-	render.OK(w, r, j)
+	// Validate the data.
+	errs := make(map[string]string)
+	if len(errs) > 0 {
+		l.Info("validation failed", zapFields(errs)...)
+		BadRequest(w, errs)
+		return
+	}
+	// Save the data.
+	b := h.client.Entry.UpdateOneID(id)
+	// Store in database.
+	e, err := b.Save(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.String("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.String("id", id))
+			BadRequest(w, msg)
+		default:
+			l.Error("could-not-update-entry", zap.Error(err), zap.String("id", id))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	// Reload entry.
+	q := h.client.Entry.Query().Where(entry.ID(e.ID))
+	e, err = q.Only(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.String("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.String("id", id))
+			BadRequest(w, msg)
+		default:
+			l.Error("could-not-read-entry", zap.Error(err), zap.String("id", id))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	l.Info("entry rendered", zap.String("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewEntry2675665849View(e), w)
 }
 
-// Payload of a ent.User update request.
-type UserUpdateRequest struct {
-	Name *string `json:"name"`
-	Age  *int    `json:"age"`
-	Pets []int   `json:"pets"`
-}
-
-// Update updates a given ent.User and saves the changes to the database.
-func (h UserHandler) Update(w http.ResponseWriter, r *http.Request) {
+// Update updates a given ent.Fridge and saves the changes to the database.
+func (h FridgeHandler) Update(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "Update"))
 	// ID is URL parameter.
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
 		l.Error("error getting id from url parameter", zap.String("id", chi.URLParam(r, "id")), zap.Error(err))
-		render.BadRequest(w, r, "id must be an integer greater zero")
+		BadRequest(w, "id must be an integer")
 		return
 	}
 	// Get the post data.
-	var d UserUpdateRequest
-	if err := json.NewDecoder(r.Body).Decode(&d); err != nil {
+	var d FridgeUpdateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
 		l.Error("error decoding json", zap.Error(err))
-		render.BadRequest(w, r, "invalid json string")
-		return
-	}
-	// Validate the data.
-	if err := h.validator.Struct(d); err != nil {
-		if err, ok := err.(*validator.InvalidValidationError); ok {
-			l.Error("error validating request data", zap.Error(err))
-			render.InternalServerError(w, r, nil)
-			return
-		}
-		l.Info("validation failed", zap.Error(err))
-		render.BadRequest(w, r, err)
+		BadRequest(w, "invalid json string")
 		return
 	}
 	// Save the data.
-	b := h.client.User.UpdateOneID(id)
-	// TODO: what about slice fields that have custom marshallers?
-	if d.Name != nil {
-		b.SetName(*d.Name)
-	}
-	if d.Age != nil {
-		b.SetAge(*d.Age)
-	}
-	if d.Pets != nil {
-		b.ClearPets().AddPetIDs(d.Pets...)
-	}
+	b := h.client.Fridge.UpdateOneID(id)
 	// Store in database.
 	e, err := b.Save(r.Context())
 	if err != nil {
-		switch err.(type) {
-		case *ent.NotFoundError:
-			l.Info("user not found", zap.Int("id", id), zap.Error(err))
-			render.NotFound(w, r, "user not found")
-		case *ent.NotSingularError:
-			l.Error("duplicate entry for user", zap.Int("id", id), zap.Error(err))
-			render.BadRequest(w, r, "duplicate user entry with id "+strconv.Itoa(e.ID))
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
 		default:
-			l.Error("error saving user", zap.Int("id", id), zap.Error(err))
-			render.InternalServerError(w, r, nil)
+			l.Error("could-not-update-fridge", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
 		}
 		return
 	}
 	// Reload entry.
-	q := h.client.User.Query().Where(user.ID(e.ID))
+	q := h.client.Fridge.Query().Where(fridge.ID(e.ID))
 	e, err = q.Only(r.Context())
 	if err != nil {
 		switch {
 		case ent.IsNotFound(err):
 			msg := stripEntError(err)
-			l.Info(msg, zap.Int("id", e.ID), zap.Error(err))
-			render.NotFound(w, r, msg)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
 		default:
-			l.Error("error fetching user from db", zap.Int("id", e.ID), zap.Error(err))
-			render.InternalServerError(w, r, nil)
+			l.Error("could-not-read-fridge", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
 		}
 		return
 	}
-	j, err := sheriff.Marshal(&sheriff.Options{
-		IncludeEmptyTag: true,
-		Groups:          []string{"user"},
-	}, e)
+	l.Info("fridge rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewFridge2211356377View(e), w)
+}
+
+// Update updates a given ent.Item and saves the changes to the database.
+func (h ItemHandler) Update(w http.ResponseWriter, r *http.Request) {
+	l := h.log.With(zap.String("method", "Update"))
+	// ID is URL parameter.
+	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		l.Error("serialization error", zap.Int("id", e.ID), zap.Error(err))
-		render.InternalServerError(w, r, nil)
+		l.Error("error getting id from url parameter", zap.String("id", chi.URLParam(r, "id")), zap.Error(err))
+		BadRequest(w, "id must be an integer")
 		return
 	}
-	l.Info("user rendered", zap.Int("id", e.ID))
-	render.OK(w, r, j)
+	// Get the post data.
+	var d ItemUpdateRequest
+	if err := easyjson.UnmarshalFromReader(r.Body, &d); err != nil {
+		l.Error("error decoding json", zap.Error(err))
+		BadRequest(w, "invalid json string")
+		return
+	}
+	// Save the data.
+	b := h.client.Item.UpdateOneID(id)
+	// Store in database.
+	e, err := b.Save(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
+		default:
+			l.Error("could-not-update-item", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	// Reload entry.
+	q := h.client.Item.Query().Where(item.ID(e.ID))
+	e, err = q.Only(r.Context())
+	if err != nil {
+		switch {
+		case ent.IsNotFound(err):
+			msg := stripEntError(err)
+			l.Info(msg, zap.Error(err), zap.Int("id", id))
+			NotFound(w, msg)
+		case ent.IsNotSingular(err):
+			msg := stripEntError(err)
+			l.Error(msg, zap.Error(err), zap.Int("id", id))
+			BadRequest(w, msg)
+		default:
+			l.Error("could-not-read-item", zap.Error(err), zap.Int("id", id))
+			InternalServerError(w, nil)
+		}
+		return
+	}
+	l.Info("item rendered", zap.Int("id", id))
+	easyjson.MarshalToHTTPResponseWriter(NewItem1548468123View(e), w)
 }

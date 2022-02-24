@@ -7,14 +7,13 @@ import (
 	"fmt"
 	"log"
 
-	"heroku-ent-example/ent/migrate"
+	"t/ent/migrate"
 
-	"heroku-ent-example/ent/pet"
-	"heroku-ent-example/ent/user"
+	"t/ent/todo"
+	"t/ent/users"
 
 	"entgo.io/ent/dialect"
 	"entgo.io/ent/dialect/sql"
-	"entgo.io/ent/dialect/sql/sqlgraph"
 )
 
 // Client is the client that holds all ent builders.
@@ -22,10 +21,10 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Pet is the client for interacting with the Pet builders.
-	Pet *PetClient
-	// User is the client for interacting with the User builders.
-	User *UserClient
+	// Todo is the client for interacting with the Todo builders.
+	Todo *TodoClient
+	// Users is the client for interacting with the Users builders.
+	Users *UsersClient
 }
 
 // NewClient creates a new client configured with the given options.
@@ -39,8 +38,8 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Pet = NewPetClient(c.config)
-	c.User = NewUserClient(c.config)
+	c.Todo = NewTodoClient(c.config)
+	c.Users = NewUsersClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -74,8 +73,8 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
-		Pet:    NewPetClient(cfg),
-		User:   NewUserClient(cfg),
+		Todo:   NewTodoClient(cfg),
+		Users:  NewUsersClient(cfg),
 	}, nil
 }
 
@@ -95,15 +94,15 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	return &Tx{
 		ctx:    ctx,
 		config: cfg,
-		Pet:    NewPetClient(cfg),
-		User:   NewUserClient(cfg),
+		Todo:   NewTodoClient(cfg),
+		Users:  NewUsersClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Pet.
+//		Todo.
 //		Query().
 //		Count(ctx)
 //
@@ -126,88 +125,88 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Pet.Use(hooks...)
-	c.User.Use(hooks...)
+	c.Todo.Use(hooks...)
+	c.Users.Use(hooks...)
 }
 
-// PetClient is a client for the Pet schema.
-type PetClient struct {
+// TodoClient is a client for the Todo schema.
+type TodoClient struct {
 	config
 }
 
-// NewPetClient returns a client for the Pet from the given config.
-func NewPetClient(c config) *PetClient {
-	return &PetClient{config: c}
+// NewTodoClient returns a client for the Todo from the given config.
+func NewTodoClient(c config) *TodoClient {
+	return &TodoClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `pet.Hooks(f(g(h())))`.
-func (c *PetClient) Use(hooks ...Hook) {
-	c.hooks.Pet = append(c.hooks.Pet, hooks...)
+// A call to `Use(f, g, h)` equals to `todo.Hooks(f(g(h())))`.
+func (c *TodoClient) Use(hooks ...Hook) {
+	c.hooks.Todo = append(c.hooks.Todo, hooks...)
 }
 
-// Create returns a create builder for Pet.
-func (c *PetClient) Create() *PetCreate {
-	mutation := newPetMutation(c.config, OpCreate)
-	return &PetCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Todo.
+func (c *TodoClient) Create() *TodoCreate {
+	mutation := newTodoMutation(c.config, OpCreate)
+	return &TodoCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of Pet entities.
-func (c *PetClient) CreateBulk(builders ...*PetCreate) *PetCreateBulk {
-	return &PetCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Todo entities.
+func (c *TodoClient) CreateBulk(builders ...*TodoCreate) *TodoCreateBulk {
+	return &TodoCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Pet.
-func (c *PetClient) Update() *PetUpdate {
-	mutation := newPetMutation(c.config, OpUpdate)
-	return &PetUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Todo.
+func (c *TodoClient) Update() *TodoUpdate {
+	mutation := newTodoMutation(c.config, OpUpdate)
+	return &TodoUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *PetClient) UpdateOne(pe *Pet) *PetUpdateOne {
-	mutation := newPetMutation(c.config, OpUpdateOne, withPet(pe))
-	return &PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *TodoClient) UpdateOne(t *Todo) *TodoUpdateOne {
+	mutation := newTodoMutation(c.config, OpUpdateOne, withTodo(t))
+	return &TodoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *PetClient) UpdateOneID(id int) *PetUpdateOne {
-	mutation := newPetMutation(c.config, OpUpdateOne, withPetID(id))
-	return &PetUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *TodoClient) UpdateOneID(id int) *TodoUpdateOne {
+	mutation := newTodoMutation(c.config, OpUpdateOne, withTodoID(id))
+	return &TodoUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Pet.
-func (c *PetClient) Delete() *PetDelete {
-	mutation := newPetMutation(c.config, OpDelete)
-	return &PetDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Todo.
+func (c *TodoClient) Delete() *TodoDelete {
+	mutation := newTodoMutation(c.config, OpDelete)
+	return &TodoDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *PetClient) DeleteOne(pe *Pet) *PetDeleteOne {
-	return c.DeleteOneID(pe.ID)
+func (c *TodoClient) DeleteOne(t *Todo) *TodoDeleteOne {
+	return c.DeleteOneID(t.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *PetClient) DeleteOneID(id int) *PetDeleteOne {
-	builder := c.Delete().Where(pet.ID(id))
+func (c *TodoClient) DeleteOneID(id int) *TodoDeleteOne {
+	builder := c.Delete().Where(todo.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &PetDeleteOne{builder}
+	return &TodoDeleteOne{builder}
 }
 
-// Query returns a query builder for Pet.
-func (c *PetClient) Query() *PetQuery {
-	return &PetQuery{
+// Query returns a query builder for Todo.
+func (c *TodoClient) Query() *TodoQuery {
+	return &TodoQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a Pet entity by its id.
-func (c *PetClient) Get(ctx context.Context, id int) (*Pet, error) {
-	return c.Query().Where(pet.ID(id)).Only(ctx)
+// Get returns a Todo entity by its id.
+func (c *TodoClient) Get(ctx context.Context, id int) (*Todo, error) {
+	return c.Query().Where(todo.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
+func (c *TodoClient) GetX(ctx context.Context, id int) *Todo {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -215,105 +214,89 @@ func (c *PetClient) GetX(ctx context.Context, id int) *Pet {
 	return obj
 }
 
-// QueryOwner queries the owner edge of a Pet.
-func (c *PetClient) QueryOwner(pe *Pet) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pe.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(pet.Table, pet.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, pet.OwnerTable, pet.OwnerColumn),
-		)
-		fromV = sqlgraph.Neighbors(pe.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
-func (c *PetClient) Hooks() []Hook {
-	return c.hooks.Pet
+func (c *TodoClient) Hooks() []Hook {
+	return c.hooks.Todo
 }
 
-// UserClient is a client for the User schema.
-type UserClient struct {
+// UsersClient is a client for the Users schema.
+type UsersClient struct {
 	config
 }
 
-// NewUserClient returns a client for the User from the given config.
-func NewUserClient(c config) *UserClient {
-	return &UserClient{config: c}
+// NewUsersClient returns a client for the Users from the given config.
+func NewUsersClient(c config) *UsersClient {
+	return &UsersClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `user.Hooks(f(g(h())))`.
-func (c *UserClient) Use(hooks ...Hook) {
-	c.hooks.User = append(c.hooks.User, hooks...)
+// A call to `Use(f, g, h)` equals to `users.Hooks(f(g(h())))`.
+func (c *UsersClient) Use(hooks ...Hook) {
+	c.hooks.Users = append(c.hooks.Users, hooks...)
 }
 
-// Create returns a create builder for User.
-func (c *UserClient) Create() *UserCreate {
-	mutation := newUserMutation(c.config, OpCreate)
-	return &UserCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Users.
+func (c *UsersClient) Create() *UsersCreate {
+	mutation := newUsersMutation(c.config, OpCreate)
+	return &UsersCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// CreateBulk returns a builder for creating a bulk of User entities.
-func (c *UserClient) CreateBulk(builders ...*UserCreate) *UserCreateBulk {
-	return &UserCreateBulk{config: c.config, builders: builders}
+// CreateBulk returns a builder for creating a bulk of Users entities.
+func (c *UsersClient) CreateBulk(builders ...*UsersCreate) *UsersCreateBulk {
+	return &UsersCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for User.
-func (c *UserClient) Update() *UserUpdate {
-	mutation := newUserMutation(c.config, OpUpdate)
-	return &UserUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Users.
+func (c *UsersClient) Update() *UsersUpdate {
+	mutation := newUsersMutation(c.config, OpUpdate)
+	return &UsersUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *UserClient) UpdateOne(u *User) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUser(u))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *UsersClient) UpdateOne(u *Users) *UsersUpdateOne {
+	mutation := newUsersMutation(c.config, OpUpdateOne, withUsers(u))
+	return &UsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *UserClient) UpdateOneID(id int) *UserUpdateOne {
-	mutation := newUserMutation(c.config, OpUpdateOne, withUserID(id))
-	return &UserUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *UsersClient) UpdateOneID(id int) *UsersUpdateOne {
+	mutation := newUsersMutation(c.config, OpUpdateOne, withUsersID(id))
+	return &UsersUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for User.
-func (c *UserClient) Delete() *UserDelete {
-	mutation := newUserMutation(c.config, OpDelete)
-	return &UserDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Users.
+func (c *UsersClient) Delete() *UsersDelete {
+	mutation := newUsersMutation(c.config, OpDelete)
+	return &UsersDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *UserClient) DeleteOne(u *User) *UserDeleteOne {
+func (c *UsersClient) DeleteOne(u *Users) *UsersDeleteOne {
 	return c.DeleteOneID(u.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *UserClient) DeleteOneID(id int) *UserDeleteOne {
-	builder := c.Delete().Where(user.ID(id))
+func (c *UsersClient) DeleteOneID(id int) *UsersDeleteOne {
+	builder := c.Delete().Where(users.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &UserDeleteOne{builder}
+	return &UsersDeleteOne{builder}
 }
 
-// Query returns a query builder for User.
-func (c *UserClient) Query() *UserQuery {
-	return &UserQuery{
+// Query returns a query builder for Users.
+func (c *UsersClient) Query() *UsersQuery {
+	return &UsersQuery{
 		config: c.config,
 	}
 }
 
-// Get returns a User entity by its id.
-func (c *UserClient) Get(ctx context.Context, id int) (*User, error) {
-	return c.Query().Where(user.ID(id)).Only(ctx)
+// Get returns a Users entity by its id.
+func (c *UsersClient) Get(ctx context.Context, id int) (*Users, error) {
+	return c.Query().Where(users.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *UserClient) GetX(ctx context.Context, id int) *User {
+func (c *UsersClient) GetX(ctx context.Context, id int) *Users {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -321,23 +304,7 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	return obj
 }
 
-// QueryPets queries the pets edge of a User.
-func (c *UserClient) QueryPets(u *User) *PetQuery {
-	query := &PetQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(pet.Table, pet.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.PetsTable, user.PetsColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // Hooks returns the client hooks.
-func (c *UserClient) Hooks() []Hook {
-	return c.hooks.User
+func (c *UsersClient) Hooks() []Hook {
+	return c.hooks.Users
 }

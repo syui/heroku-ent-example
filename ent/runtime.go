@@ -3,18 +3,41 @@
 package ent
 
 import (
-	"heroku-ent-example/ent/pet"
-	"heroku-ent-example/ent/schema"
+	"t/ent/schema"
+	"t/ent/users"
+	"time"
 )
 
 // The init function reads all schema descriptors with runtime code
 // (default values, validators, hooks and policies) and stitches it
 // to their package variables.
 func init() {
-	petFields := schema.Pet{}.Fields()
-	_ = petFields
-	// petDescAge is the schema descriptor for age field.
-	petDescAge := petFields[1].Descriptor()
-	// pet.AgeValidator is a validator for the "age" field. It is called by the builders before save.
-	pet.AgeValidator = petDescAge.Validators[0].(func(int) error)
+	usersFields := schema.Users{}.Fields()
+	_ = usersFields
+	// usersDescUser is the schema descriptor for user field.
+	usersDescUser := usersFields[0].Descriptor()
+	// users.UserValidator is a validator for the "user" field. It is called by the builders before save.
+	users.UserValidator = func() func(string) error {
+		validators := usersDescUser.Validators
+		fns := [...]func(string) error{
+			validators[0].(func(string) error),
+			validators[1].(func(string) error),
+		}
+		return func(user string) error {
+			for _, fn := range fns {
+				if err := fn(user); err != nil {
+					return err
+				}
+			}
+			return nil
+		}
+	}()
+	// usersDescCreatedAt is the schema descriptor for created_at field.
+	usersDescCreatedAt := usersFields[3].Descriptor()
+	// users.DefaultCreatedAt holds the default value on creation for the created_at field.
+	users.DefaultCreatedAt = usersDescCreatedAt.Default.(func() time.Time)
+	// usersDescUpdatedAt is the schema descriptor for updated_at field.
+	usersDescUpdatedAt := usersFields[4].Descriptor()
+	// users.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	users.DefaultUpdatedAt = usersDescUpdatedAt.Default.(func() time.Time)
 }

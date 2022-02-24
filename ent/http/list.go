@@ -6,23 +6,22 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/liip/sheriff"
-	"github.com/masseelch/render"
+	"github.com/mailru/easyjson"
 	"go.uber.org/zap"
 )
 
-// Read fetches the ent.Pet identified by a given url-parameter from the
+// Read fetches the ent.Compartment identified by a given url-parameter from the
 // database and returns it to the client.
-func (h *PetHandler) List(w http.ResponseWriter, r *http.Request) {
+func (h *CompartmentHandler) List(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "List"))
-	q := h.client.Pet.Query()
+	q := h.client.Compartment.Query()
 	var err error
 	page := 1
 	if d := r.URL.Query().Get("page"); d != "" {
 		page, err = strconv.Atoi(d)
 		if err != nil {
 			l.Info("error parsing query parameter 'page'", zap.String("page", d), zap.Error(err))
-			render.BadRequest(w, r, "page must be an integer greater zero")
+			BadRequest(w, "page must be an integer greater zero")
 			return
 		}
 	}
@@ -31,41 +30,32 @@ func (h *PetHandler) List(w http.ResponseWriter, r *http.Request) {
 		itemsPerPage, err = strconv.Atoi(d)
 		if err != nil {
 			l.Info("error parsing query parameter 'itemsPerPage'", zap.String("itemsPerPage", d), zap.Error(err))
-			render.BadRequest(w, r, "itemsPerPage must be an integer greater zero")
+			BadRequest(w, "itemsPerPage must be an integer greater zero")
 			return
 		}
 	}
 	es, err := q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage).All(r.Context())
 	if err != nil {
-		l.Error("error fetching pets from db", zap.Error(err))
-		render.InternalServerError(w, r, nil)
+		l.Error("error fetching compartments from db", zap.Error(err))
+		InternalServerError(w, nil)
 		return
 	}
-	d, err := sheriff.Marshal(&sheriff.Options{
-		IncludeEmptyTag: true,
-		Groups:          []string{"pet"},
-	}, es)
-	if err != nil {
-		l.Error("serialization error", zap.Error(err))
-		render.InternalServerError(w, r, nil)
-		return
-	}
-	l.Info("pets rendered", zap.Int("amount", len(es)))
-	render.OK(w, r, d)
+	l.Info("compartments rendered", zap.Int("amount", len(es)))
+	easyjson.MarshalToHTTPResponseWriter(NewCompartment3324871446Views(es), w)
 }
 
-// Read fetches the ent.User identified by a given url-parameter from the
+// Read fetches the ent.Entry identified by a given url-parameter from the
 // database and returns it to the client.
-func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
+func (h *EntryHandler) List(w http.ResponseWriter, r *http.Request) {
 	l := h.log.With(zap.String("method", "List"))
-	q := h.client.User.Query()
+	q := h.client.Entry.Query()
 	var err error
 	page := 1
 	if d := r.URL.Query().Get("page"); d != "" {
 		page, err = strconv.Atoi(d)
 		if err != nil {
 			l.Info("error parsing query parameter 'page'", zap.String("page", d), zap.Error(err))
-			render.BadRequest(w, r, "page must be an integer greater zero")
+			BadRequest(w, "page must be an integer greater zero")
 			return
 		}
 	}
@@ -74,25 +64,84 @@ func (h *UserHandler) List(w http.ResponseWriter, r *http.Request) {
 		itemsPerPage, err = strconv.Atoi(d)
 		if err != nil {
 			l.Info("error parsing query parameter 'itemsPerPage'", zap.String("itemsPerPage", d), zap.Error(err))
-			render.BadRequest(w, r, "itemsPerPage must be an integer greater zero")
+			BadRequest(w, "itemsPerPage must be an integer greater zero")
 			return
 		}
 	}
 	es, err := q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage).All(r.Context())
 	if err != nil {
-		l.Error("error fetching users from db", zap.Error(err))
-		render.InternalServerError(w, r, nil)
+		l.Error("error fetching entries from db", zap.Error(err))
+		InternalServerError(w, nil)
 		return
 	}
-	d, err := sheriff.Marshal(&sheriff.Options{
-		IncludeEmptyTag: true,
-		Groups:          []string{"user"},
-	}, es)
+	l.Info("entries rendered", zap.Int("amount", len(es)))
+	easyjson.MarshalToHTTPResponseWriter(NewEntry2675665849Views(es), w)
+}
+
+// Read fetches the ent.Fridge identified by a given url-parameter from the
+// database and returns it to the client.
+func (h *FridgeHandler) List(w http.ResponseWriter, r *http.Request) {
+	l := h.log.With(zap.String("method", "List"))
+	q := h.client.Fridge.Query()
+	var err error
+	page := 1
+	if d := r.URL.Query().Get("page"); d != "" {
+		page, err = strconv.Atoi(d)
+		if err != nil {
+			l.Info("error parsing query parameter 'page'", zap.String("page", d), zap.Error(err))
+			BadRequest(w, "page must be an integer greater zero")
+			return
+		}
+	}
+	itemsPerPage := 30
+	if d := r.URL.Query().Get("itemsPerPage"); d != "" {
+		itemsPerPage, err = strconv.Atoi(d)
+		if err != nil {
+			l.Info("error parsing query parameter 'itemsPerPage'", zap.String("itemsPerPage", d), zap.Error(err))
+			BadRequest(w, "itemsPerPage must be an integer greater zero")
+			return
+		}
+	}
+	es, err := q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage).All(r.Context())
 	if err != nil {
-		l.Error("serialization error", zap.Error(err))
-		render.InternalServerError(w, r, nil)
+		l.Error("error fetching fridges from db", zap.Error(err))
+		InternalServerError(w, nil)
 		return
 	}
-	l.Info("users rendered", zap.Int("amount", len(es)))
-	render.OK(w, r, d)
+	l.Info("fridges rendered", zap.Int("amount", len(es)))
+	easyjson.MarshalToHTTPResponseWriter(NewFridge2211356377Views(es), w)
+}
+
+// Read fetches the ent.Item identified by a given url-parameter from the
+// database and returns it to the client.
+func (h *ItemHandler) List(w http.ResponseWriter, r *http.Request) {
+	l := h.log.With(zap.String("method", "List"))
+	q := h.client.Item.Query()
+	var err error
+	page := 1
+	if d := r.URL.Query().Get("page"); d != "" {
+		page, err = strconv.Atoi(d)
+		if err != nil {
+			l.Info("error parsing query parameter 'page'", zap.String("page", d), zap.Error(err))
+			BadRequest(w, "page must be an integer greater zero")
+			return
+		}
+	}
+	itemsPerPage := 30
+	if d := r.URL.Query().Get("itemsPerPage"); d != "" {
+		itemsPerPage, err = strconv.Atoi(d)
+		if err != nil {
+			l.Info("error parsing query parameter 'itemsPerPage'", zap.String("itemsPerPage", d), zap.Error(err))
+			BadRequest(w, "itemsPerPage must be an integer greater zero")
+			return
+		}
+	}
+	es, err := q.Limit(itemsPerPage).Offset((page - 1) * itemsPerPage).All(r.Context())
+	if err != nil {
+		l.Error("error fetching items from db", zap.Error(err))
+		InternalServerError(w, nil)
+		return
+	}
+	l.Info("items rendered", zap.Int("amount", len(es)))
+	easyjson.MarshalToHTTPResponseWriter(NewItem1548468123Views(es), w)
 }

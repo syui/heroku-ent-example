@@ -8,32 +8,26 @@ import (
 )
 
 var (
-	// PetsColumns holds the columns for the "pets" table.
-	PetsColumns = []*schema.Column{
+	// TodosColumns holds the columns for the "todos" table.
+	TodosColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString},
-		{Name: "age", Type: field.TypeInt},
-		{Name: "user_pets", Type: field.TypeInt, Nullable: true},
+		{Name: "title", Type: field.TypeString},
+		{Name: "done", Type: field.TypeBool, Nullable: true},
 	}
-	// PetsTable holds the schema information for the "pets" table.
-	PetsTable = &schema.Table{
-		Name:       "pets",
-		Columns:    PetsColumns,
-		PrimaryKey: []*schema.Column{PetsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:     "pets_users_pets",
-				Columns:    []*schema.Column{PetsColumns[3]},
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
+	// TodosTable holds the schema information for the "todos" table.
+	TodosTable = &schema.Table{
+		Name:       "todos",
+		Columns:    TodosColumns,
+		PrimaryKey: []*schema.Column{TodosColumns[0]},
 	}
 	// UsersColumns holds the columns for the "users" table.
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "name", Type: field.TypeString, Unique: true},
-		//{Name: "age", Type: field.TypeInt},
+		{Name: "user", Type: field.TypeString, Unique: true, Size: 7},
+		{Name: "first", Type: field.TypeInt, Nullable: true},
+		{Name: "draw", Type: field.TypeInt, Nullable: true},
+		{Name: "created_at", Type: field.TypeTime, Nullable: true},
+		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -43,11 +37,10 @@ var (
 	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		//PetsTable,
+		TodosTable,
 		UsersTable,
 	}
 )
 
 func init() {
-	PetsTable.ForeignKeys[0].RefTable = UsersTable
 }

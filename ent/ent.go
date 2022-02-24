@@ -3,10 +3,10 @@
 package ent
 
 import (
-	"heroku-ent-example/ent/pet"
-	"heroku-ent-example/ent/user"
 	"errors"
 	"fmt"
+	"t/ent/todo"
+	"t/ent/users"
 
 	"entgo.io/ent"
 	"entgo.io/ent/dialect/sql"
@@ -30,8 +30,8 @@ type OrderFunc func(*sql.Selector)
 // columnChecker returns a function indicates if the column exists in the given column.
 func columnChecker(table string) func(string) error {
 	checks := map[string]func(string) bool{
-		pet.Table:  pet.ValidColumn,
-		user.Table: user.ValidColumn,
+		todo.Table:  todo.ValidColumn,
+		users.Table: users.ValidColumn,
 	}
 	check, ok := checks[table]
 	if !ok {
