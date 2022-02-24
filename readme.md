@@ -23,3 +23,5 @@ ref :
 - https://github.com/ent/ent/blob/master/dialect/sql/schema/postgres_test.go
 
 - https://github.com/go-kratos/beer-shop/tree/main/app/catalog/service/internal/data/ent
+
+- https://entgo.io/ja/blog/2022/02/15/generate-rest-crud-with-ent-and-ogen/
