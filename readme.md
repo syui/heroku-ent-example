@@ -15,7 +15,7 @@ $ heroku logs
 ```
 
 ```sh
-$ curl "https://$APP.herokuapp.com/users/"
+$ curl https://$APP.herokuapp.com/users/1
 ```
 
 ref : 
