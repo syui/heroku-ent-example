@@ -80,6 +80,14 @@ type DeleteUsersParams struct {
 	ID int
 }
 
+type DrawDoneParams struct {
+	ID int
+}
+
+type DrawStartParams struct {
+	ID int
+}
+
 type ListTodoParams struct {
 	// What page to render.
 	Page OptInt
@@ -92,6 +100,10 @@ type ListUsersParams struct {
 	Page OptInt
 	// Item count to render per page.
 	ItemsPerPage OptInt
+}
+
+type MarkDoneParams struct {
+	ID int
 }
 
 type ReadTodoParams struct {

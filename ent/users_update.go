@@ -28,30 +28,23 @@ func (uu *UsersUpdate) Where(ps ...predicate.Users) *UsersUpdate {
 	return uu
 }
 
-// SetFirst sets the "first" field.
-func (uu *UsersUpdate) SetFirst(i int) *UsersUpdate {
-	uu.mutation.ResetFirst()
-	uu.mutation.SetFirst(i)
+// SetStart sets the "start" field.
+func (uu *UsersUpdate) SetStart(b bool) *UsersUpdate {
+	uu.mutation.SetStart(b)
 	return uu
 }
 
-// SetNillableFirst sets the "first" field if the given value is not nil.
-func (uu *UsersUpdate) SetNillableFirst(i *int) *UsersUpdate {
-	if i != nil {
-		uu.SetFirst(*i)
+// SetNillableStart sets the "start" field if the given value is not nil.
+func (uu *UsersUpdate) SetNillableStart(b *bool) *UsersUpdate {
+	if b != nil {
+		uu.SetStart(*b)
 	}
 	return uu
 }
 
-// AddFirst adds i to the "first" field.
-func (uu *UsersUpdate) AddFirst(i int) *UsersUpdate {
-	uu.mutation.AddFirst(i)
-	return uu
-}
-
-// ClearFirst clears the value of the "first" field.
-func (uu *UsersUpdate) ClearFirst() *UsersUpdate {
-	uu.mutation.ClearFirst()
+// ClearStart clears the value of the "start" field.
+func (uu *UsersUpdate) ClearStart() *UsersUpdate {
+	uu.mutation.ClearStart()
 	return uu
 }
 
@@ -199,24 +192,23 @@ func (uu *UsersUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			}
 		}
 	}
-	if value, ok := uu.mutation.First(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: users.FieldFirst,
-		})
-	}
-	if value, ok := uu.mutation.AddedFirst(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: users.FieldFirst,
-		})
-	}
 	if uu.mutation.FirstCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: users.FieldFirst,
+		})
+	}
+	if value, ok := uu.mutation.Start(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: users.FieldStart,
+		})
+	}
+	if uu.mutation.StartCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: users.FieldStart,
 		})
 	}
 	if value, ok := uu.mutation.Draw(); ok {
@@ -284,30 +276,23 @@ type UsersUpdateOne struct {
 	mutation *UsersMutation
 }
 
-// SetFirst sets the "first" field.
-func (uuo *UsersUpdateOne) SetFirst(i int) *UsersUpdateOne {
-	uuo.mutation.ResetFirst()
-	uuo.mutation.SetFirst(i)
+// SetStart sets the "start" field.
+func (uuo *UsersUpdateOne) SetStart(b bool) *UsersUpdateOne {
+	uuo.mutation.SetStart(b)
 	return uuo
 }
 
-// SetNillableFirst sets the "first" field if the given value is not nil.
-func (uuo *UsersUpdateOne) SetNillableFirst(i *int) *UsersUpdateOne {
-	if i != nil {
-		uuo.SetFirst(*i)
+// SetNillableStart sets the "start" field if the given value is not nil.
+func (uuo *UsersUpdateOne) SetNillableStart(b *bool) *UsersUpdateOne {
+	if b != nil {
+		uuo.SetStart(*b)
 	}
 	return uuo
 }
 
-// AddFirst adds i to the "first" field.
-func (uuo *UsersUpdateOne) AddFirst(i int) *UsersUpdateOne {
-	uuo.mutation.AddFirst(i)
-	return uuo
-}
-
-// ClearFirst clears the value of the "first" field.
-func (uuo *UsersUpdateOne) ClearFirst() *UsersUpdateOne {
-	uuo.mutation.ClearFirst()
+// ClearStart clears the value of the "start" field.
+func (uuo *UsersUpdateOne) ClearStart() *UsersUpdateOne {
+	uuo.mutation.ClearStart()
 	return uuo
 }
 
@@ -479,24 +464,23 @@ func (uuo *UsersUpdateOne) sqlSave(ctx context.Context) (_node *Users, err error
 			}
 		}
 	}
-	if value, ok := uuo.mutation.First(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: users.FieldFirst,
-		})
-	}
-	if value, ok := uuo.mutation.AddedFirst(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: users.FieldFirst,
-		})
-	}
 	if uuo.mutation.FirstCleared() {
 		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
 			Type:   field.TypeInt,
 			Column: users.FieldFirst,
+		})
+	}
+	if value, ok := uuo.mutation.Start(); ok {
+		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: users.FieldStart,
+		})
+	}
+	if uuo.mutation.StartCleared() {
+		_spec.Fields.Clear = append(_spec.Fields.Clear, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Column: users.FieldStart,
 		})
 	}
 	if value, ok := uuo.mutation.Draw(); ok {

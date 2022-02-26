@@ -24,8 +24,9 @@ var (
 	UsersColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "user", Type: field.TypeString, Unique: true, Size: 7},
-		{Name: "first", Type: field.TypeInt, Nullable: true},
-		{Name: "draw", Type: field.TypeInt, Nullable: true},
+		{Name: "first", Type: field.TypeInt, Nullable: true, Default: 1},
+		{Name: "start", Type: field.TypeBool, Nullable: true, Default: false},
+		{Name: "draw", Type: field.TypeInt, Nullable: true, Default: 4},
 		{Name: "created_at", Type: field.TypeTime, Nullable: true},
 		{Name: "updated_at", Type: field.TypeTime, Nullable: true},
 	}

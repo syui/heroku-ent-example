@@ -534,6 +534,24 @@ func decodeDeleteUsersResponse(resp *http.Response, span trace.Span) (res Delete
 	}
 }
 
+func decodeDrawDoneResponse(resp *http.Response, span trace.Span) (res DrawDoneNoContent, err error) {
+	switch resp.StatusCode {
+	case 204:
+		return DrawDoneNoContent{}, nil
+	default:
+		return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	}
+}
+
+func decodeDrawStartResponse(resp *http.Response, span trace.Span) (res DrawStartNoContent, err error) {
+	switch resp.StatusCode {
+	case 204:
+		return DrawStartNoContent{}, nil
+	default:
+		return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	}
+}
+
 func decodeListTodoResponse(resp *http.Response, span trace.Span) (res ListTodoRes, err error) {
 	switch resp.StatusCode {
 	case 200:
@@ -813,6 +831,15 @@ func decodeListUsersResponse(resp *http.Response, span trace.Span) (res ListUser
 		default:
 			return res, validate.InvalidContentType(ct)
 		}
+	default:
+		return res, validate.UnexpectedStatusCode(resp.StatusCode)
+	}
+}
+
+func decodeMarkDoneResponse(resp *http.Response, span trace.Span) (res MarkDoneNoContent, err error) {
+	switch resp.StatusCode {
+	case 204:
+		return MarkDoneNoContent{}, nil
 	default:
 		return res, validate.UnexpectedStatusCode(resp.StatusCode)
 	}

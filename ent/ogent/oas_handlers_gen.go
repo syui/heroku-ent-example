@@ -242,6 +242,92 @@ func (s *Server) handleDeleteUsersRequest(args [1]string, w http.ResponseWriter,
 	s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
 }
 
+// HandleDrawDoneRequest handles drawDone operation.
+//
+// PATCH /users/{id}/d
+func (s *Server) handleDrawDoneRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("drawDone"),
+	}
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DrawDone",
+		trace.WithAttributes(otelAttrs...),
+		trace.WithSpanKind(trace.SpanKindServer),
+	)
+	s.requests.Add(ctx, 1, otelAttrs...)
+	defer span.End()
+	params, err := decodeDrawDoneParams(args, r)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "BadRequest")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		respondError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	response, err := s.h.DrawDone(ctx, params)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "Internal")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		respondError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := encodeDrawDoneResponse(response, w, span); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "Response")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		return
+	}
+	span.SetStatus(codes.Ok, "Ok")
+	elapsedDuration := time.Since(startTime)
+	s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+}
+
+// HandleDrawStartRequest handles drawStart operation.
+//
+// PATCH /users/{id}/start
+func (s *Server) handleDrawStartRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("drawStart"),
+	}
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "DrawStart",
+		trace.WithAttributes(otelAttrs...),
+		trace.WithSpanKind(trace.SpanKindServer),
+	)
+	s.requests.Add(ctx, 1, otelAttrs...)
+	defer span.End()
+	params, err := decodeDrawStartParams(args, r)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "BadRequest")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		respondError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	response, err := s.h.DrawStart(ctx, params)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "Internal")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		respondError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := encodeDrawStartResponse(response, w, span); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "Response")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		return
+	}
+	span.SetStatus(codes.Ok, "Ok")
+	elapsedDuration := time.Since(startTime)
+	s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+}
+
 // HandleListTodoRequest handles listTodo operation.
 //
 // GET /todos
@@ -318,6 +404,49 @@ func (s *Server) handleListUsersRequest(args [0]string, w http.ResponseWriter, r
 	}
 
 	if err := encodeListUsersResponse(response, w, span); err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "Response")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		return
+	}
+	span.SetStatus(codes.Ok, "Ok")
+	elapsedDuration := time.Since(startTime)
+	s.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+}
+
+// HandleMarkDoneRequest handles markDone operation.
+//
+// PATCH /todos/{id}/done
+func (s *Server) handleMarkDoneRequest(args [1]string, w http.ResponseWriter, r *http.Request) {
+	startTime := time.Now()
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("markDone"),
+	}
+	ctx, span := s.cfg.Tracer.Start(r.Context(), "MarkDone",
+		trace.WithAttributes(otelAttrs...),
+		trace.WithSpanKind(trace.SpanKindServer),
+	)
+	s.requests.Add(ctx, 1, otelAttrs...)
+	defer span.End()
+	params, err := decodeMarkDoneParams(args, r)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "BadRequest")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		respondError(w, http.StatusBadRequest, err)
+		return
+	}
+
+	response, err := s.h.MarkDone(ctx, params)
+	if err != nil {
+		span.RecordError(err)
+		span.SetStatus(codes.Error, "Internal")
+		s.errors.Add(ctx, 1, otelAttrs...)
+		respondError(w, http.StatusInternalServerError, err)
+		return
+	}
+
+	if err := encodeMarkDoneResponse(response, w, span); err != nil {
 		span.RecordError(err)
 		span.SetStatus(codes.Error, "Response")
 		s.errors.Add(ctx, 1, otelAttrs...)

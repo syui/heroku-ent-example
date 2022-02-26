@@ -78,6 +78,7 @@ type CreateTodoReq struct {
 type CreateUsersReq struct {
 	User      string      "json:\"user\""
 	First     OptInt      "json:\"first\""
+	Start     OptBool     "json:\"start\""
 	Draw      OptInt      "json:\"draw\""
 	CreatedAt OptDateTime "json:\"created_at\""
 	UpdatedAt OptDateTime "json:\"updated_at\""
@@ -93,6 +94,12 @@ type DeleteUsersNoContent struct{}
 
 func (*DeleteUsersNoContent) deleteUsersRes() {}
 
+// DrawDoneNoContent is response for DrawDone operation.
+type DrawDoneNoContent struct{}
+
+// DrawStartNoContent is response for DrawStart operation.
+type DrawStartNoContent struct{}
+
 type ListTodoOKApplicationJSON []TodoList
 
 func (ListTodoOKApplicationJSON) listTodoRes() {}
@@ -100,6 +107,9 @@ func (ListTodoOKApplicationJSON) listTodoRes() {}
 type ListUsersOKApplicationJSON []UsersList
 
 func (ListUsersOKApplicationJSON) listUsersRes() {}
+
+// MarkDoneNoContent is response for MarkDone operation.
+type MarkDoneNoContent struct{}
 
 // NewOptBool returns new OptBool with value set to v.
 func NewOptBool(v bool) OptBool {
@@ -391,7 +401,7 @@ type UpdateTodoReq struct {
 }
 
 type UpdateUsersReq struct {
-	First     OptInt      "json:\"first\""
+	Start     OptBool     "json:\"start\""
 	Draw      OptInt      "json:\"draw\""
 	CreatedAt OptDateTime "json:\"created_at\""
 	UpdatedAt OptDateTime "json:\"updated_at\""
@@ -402,6 +412,7 @@ type UsersCreate struct {
 	ID        int         "json:\"id\""
 	User      string      "json:\"user\""
 	First     OptInt      "json:\"first\""
+	Start     OptBool     "json:\"start\""
 	Draw      OptInt      "json:\"draw\""
 	CreatedAt OptDateTime "json:\"created_at\""
 	UpdatedAt OptDateTime "json:\"updated_at\""
@@ -414,6 +425,7 @@ type UsersList struct {
 	ID        int         "json:\"id\""
 	User      string      "json:\"user\""
 	First     OptInt      "json:\"first\""
+	Start     OptBool     "json:\"start\""
 	Draw      OptInt      "json:\"draw\""
 	CreatedAt OptDateTime "json:\"created_at\""
 	UpdatedAt OptDateTime "json:\"updated_at\""
@@ -424,6 +436,7 @@ type UsersRead struct {
 	ID        int         "json:\"id\""
 	User      string      "json:\"user\""
 	First     OptInt      "json:\"first\""
+	Start     OptBool     "json:\"start\""
 	Draw      OptInt      "json:\"draw\""
 	CreatedAt OptDateTime "json:\"created_at\""
 	UpdatedAt OptDateTime "json:\"updated_at\""
@@ -436,6 +449,7 @@ type UsersUpdate struct {
 	ID        int         "json:\"id\""
 	User      string      "json:\"user\""
 	First     OptInt      "json:\"first\""
+	Start     OptBool     "json:\"start\""
 	Draw      OptInt      "json:\"draw\""
 	CreatedAt OptDateTime "json:\"created_at\""
 	UpdatedAt OptDateTime "json:\"updated_at\""

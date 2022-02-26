@@ -96,6 +96,14 @@ type Handler interface {
 	//
 	// DELETE /users/{id}
 	DeleteUsers(ctx context.Context, params DeleteUsersParams) (DeleteUsersRes, error)
+	// DrawDone implements drawDone operation.
+	//
+	// PATCH /users/{id}/d
+	DrawDone(ctx context.Context, params DrawDoneParams) (DrawDoneNoContent, error)
+	// DrawStart implements drawStart operation.
+	//
+	// PATCH /users/{id}/start
+	DrawStart(ctx context.Context, params DrawStartParams) (DrawStartNoContent, error)
 	// ListTodo implements listTodo operation.
 	//
 	// List Todos.
@@ -108,6 +116,10 @@ type Handler interface {
 	//
 	// GET /users
 	ListUsers(ctx context.Context, params ListUsersParams) (ListUsersRes, error)
+	// MarkDone implements markDone operation.
+	//
+	// PATCH /todos/{id}/done
+	MarkDone(ctx context.Context, params MarkDoneParams) (MarkDoneNoContent, error)
 	// ReadTodo implements readTodo operation.
 	//
 	// Finds the Todo with the requested ID and returns it.

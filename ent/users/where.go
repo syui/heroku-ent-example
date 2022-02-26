@@ -106,6 +106,13 @@ func First(v int) predicate.Users {
 	})
 }
 
+// Start applies equality check predicate on the "start" field. It's identical to StartEQ.
+func Start(v bool) predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStart), v))
+	})
+}
+
 // Draw applies equality check predicate on the "draw" field. It's identical to DrawEQ.
 func Draw(v int) predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
@@ -325,6 +332,34 @@ func FirstIsNil() predicate.Users {
 func FirstNotNil() predicate.Users {
 	return predicate.Users(func(s *sql.Selector) {
 		s.Where(sql.NotNull(s.C(FieldFirst)))
+	})
+}
+
+// StartEQ applies the EQ predicate on the "start" field.
+func StartEQ(v bool) predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		s.Where(sql.EQ(s.C(FieldStart), v))
+	})
+}
+
+// StartNEQ applies the NEQ predicate on the "start" field.
+func StartNEQ(v bool) predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		s.Where(sql.NEQ(s.C(FieldStart), v))
+	})
+}
+
+// StartIsNil applies the IsNil predicate on the "start" field.
+func StartIsNil() predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		s.Where(sql.IsNull(s.C(FieldStart)))
+	})
+}
+
+// StartNotNil applies the NotNil predicate on the "start" field.
+func StartNotNil() predicate.Users {
+	return predicate.Users(func(s *sql.Selector) {
+		s.Where(sql.NotNull(s.C(FieldStart)))
 	})
 }
 

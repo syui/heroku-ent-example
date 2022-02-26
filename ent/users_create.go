@@ -40,6 +40,20 @@ func (uc *UsersCreate) SetNillableFirst(i *int) *UsersCreate {
 	return uc
 }
 
+// SetStart sets the "start" field.
+func (uc *UsersCreate) SetStart(b bool) *UsersCreate {
+	uc.mutation.SetStart(b)
+	return uc
+}
+
+// SetNillableStart sets the "start" field if the given value is not nil.
+func (uc *UsersCreate) SetNillableStart(b *bool) *UsersCreate {
+	if b != nil {
+		uc.SetStart(*b)
+	}
+	return uc
+}
+
 // SetDraw sets the "draw" field.
 func (uc *UsersCreate) SetDraw(i int) *UsersCreate {
 	uc.mutation.SetDraw(i)
@@ -153,6 +167,18 @@ func (uc *UsersCreate) ExecX(ctx context.Context) {
 
 // defaults sets the default values of the builder before save.
 func (uc *UsersCreate) defaults() {
+	if _, ok := uc.mutation.First(); !ok {
+		v := users.DefaultFirst
+		uc.mutation.SetFirst(v)
+	}
+	if _, ok := uc.mutation.Start(); !ok {
+		v := users.DefaultStart
+		uc.mutation.SetStart(v)
+	}
+	if _, ok := uc.mutation.Draw(); !ok {
+		v := users.DefaultDraw
+		uc.mutation.SetDraw(v)
+	}
 	if _, ok := uc.mutation.CreatedAt(); !ok {
 		v := users.DefaultCreatedAt()
 		uc.mutation.SetCreatedAt(v)
@@ -215,6 +241,14 @@ func (uc *UsersCreate) createSpec() (*Users, *sqlgraph.CreateSpec) {
 			Column: users.FieldFirst,
 		})
 		_node.First = value
+	}
+	if value, ok := uc.mutation.Start(); ok {
+		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
+			Type:   field.TypeBool,
+			Value:  value,
+			Column: users.FieldStart,
+		})
+		_node.Start = value
 	}
 	if value, ok := uc.mutation.Draw(); ok {
 		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{

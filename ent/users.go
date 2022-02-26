@@ -20,6 +20,8 @@ type Users struct {
 	User string `json:"user,omitempty"`
 	// First holds the value of the "first" field.
 	First int `json:"first,omitempty"`
+	// Start holds the value of the "start" field.
+	Start bool `json:"start,omitempty"`
 	// Draw holds the value of the "draw" field.
 	Draw int `json:"draw,omitempty"`
 	// CreatedAt holds the value of the "created_at" field.
@@ -33,6 +35,8 @@ func (*Users) scanValues(columns []string) ([]interface{}, error) {
 	values := make([]interface{}, len(columns))
 	for i := range columns {
 		switch columns[i] {
+		case users.FieldStart:
+			values[i] = new(sql.NullBool)
 		case users.FieldID, users.FieldFirst, users.FieldDraw:
 			values[i] = new(sql.NullInt64)
 		case users.FieldUser:
@@ -71,6 +75,12 @@ func (u *Users) assignValues(columns []string, values []interface{}) error {
 				return fmt.Errorf("unexpected type %T for field first", values[i])
 			} else if value.Valid {
 				u.First = int(value.Int64)
+			}
+		case users.FieldStart:
+			if value, ok := values[i].(*sql.NullBool); !ok {
+				return fmt.Errorf("unexpected type %T for field start", values[i])
+			} else if value.Valid {
+				u.Start = value.Bool
 			}
 		case users.FieldDraw:
 			if value, ok := values[i].(*sql.NullInt64); !ok {
@@ -122,6 +132,8 @@ func (u *Users) String() string {
 	builder.WriteString(u.User)
 	builder.WriteString(", first=")
 	builder.WriteString(fmt.Sprintf("%v", u.First))
+	builder.WriteString(", start=")
+	builder.WriteString(fmt.Sprintf("%v", u.Start))
 	builder.WriteString(", draw=")
 	builder.WriteString(fmt.Sprintf("%v", u.Draw))
 	builder.WriteString(", created_at=")

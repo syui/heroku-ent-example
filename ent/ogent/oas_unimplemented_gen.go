@@ -111,6 +111,20 @@ func (UnimplementedHandler) DeleteUsers(ctx context.Context, params DeleteUsersP
 	return r, ht.ErrNotImplemented
 }
 
+// DrawDone implements drawDone operation.
+//
+// PATCH /users/{id}/d
+func (UnimplementedHandler) DrawDone(ctx context.Context, params DrawDoneParams) (r DrawDoneNoContent, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// DrawStart implements drawStart operation.
+//
+// PATCH /users/{id}/start
+func (UnimplementedHandler) DrawStart(ctx context.Context, params DrawStartParams) (r DrawStartNoContent, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
 // ListTodo implements listTodo operation.
 //
 // List Todos.
@@ -126,6 +140,13 @@ func (UnimplementedHandler) ListTodo(ctx context.Context, params ListTodoParams)
 //
 // GET /users
 func (UnimplementedHandler) ListUsers(ctx context.Context, params ListUsersParams) (r ListUsersRes, _ error) {
+	return r, ht.ErrNotImplemented
+}
+
+// MarkDone implements markDone operation.
+//
+// PATCH /todos/{id}/done
+func (UnimplementedHandler) MarkDone(ctx context.Context, params MarkDoneParams) (r MarkDoneNoContent, _ error) {
 	return r, ht.ErrNotImplemented
 }
 

@@ -15,6 +15,8 @@ const (
 	FieldUser = "user"
 	// FieldFirst holds the string denoting the first field in the database.
 	FieldFirst = "first"
+	// FieldStart holds the string denoting the start field in the database.
+	FieldStart = "start"
 	// FieldDraw holds the string denoting the draw field in the database.
 	FieldDraw = "draw"
 	// FieldCreatedAt holds the string denoting the created_at field in the database.
@@ -30,6 +32,7 @@ var Columns = []string{
 	FieldID,
 	FieldUser,
 	FieldFirst,
+	FieldStart,
 	FieldDraw,
 	FieldCreatedAt,
 	FieldUpdatedAt,
@@ -48,6 +51,12 @@ func ValidColumn(column string) bool {
 var (
 	// UserValidator is a validator for the "user" field. It is called by the builders before save.
 	UserValidator func(string) error
+	// DefaultFirst holds the default value on creation for the "first" field.
+	DefaultFirst int
+	// DefaultStart holds the default value on creation for the "start" field.
+	DefaultStart bool
+	// DefaultDraw holds the default value on creation for the "draw" field.
+	DefaultDraw int
 	// DefaultCreatedAt holds the default value on creation for the "created_at" field.
 	DefaultCreatedAt func() time.Time
 	// DefaultUpdatedAt holds the default value on creation for the "updated_at" field.

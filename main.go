@@ -4,11 +4,10 @@ import (
 	"time"
 	"t/ent"
 	"net/http"
-
+	"math/rand"
 	"context"
 	"log"
 	"os"
-
 	"database/sql"
 	entsql "entgo.io/ent/dialect/sql"
 	"entgo.io/ent/dialect"
@@ -33,6 +32,32 @@ func Open(databaseUrl string) *ent.Client {
 	return ent.NewClient(ent.Driver(drv))
 }
 
+func Random(i int) (l int){
+	rand.Seed(time.Now().UnixNano())
+	l = rand.Intn(20)
+	for l == 0 {
+		l = rand.Intn(20)
+	}
+	return
+}
+
+type handler struct {
+    *ogent.OgentHandler
+    client *ent.Client
+}
+
+func (h handler) MarkDone(ctx context.Context, params ogent.MarkDoneParams) (ogent.MarkDoneNoContent, error) {
+    return ogent.MarkDoneNoContent{}, h.client.Todo.UpdateOneID(params.ID).SetDone(true).Exec(ctx)
+}
+
+func (h handler) DrawStart(ctx context.Context, params ogent.DrawStartParams) (ogent.DrawStartNoContent, error) {
+    return ogent.DrawStartNoContent{}, h.client.Users.UpdateOneID(params.ID).SetStart(true).Exec(ctx)
+}
+
+func (h handler) DrawDone(ctx context.Context, params ogent.DrawDoneParams) (ogent.DrawDoneNoContent, error) {
+    return ogent.DrawDoneNoContent{}, h.client.Users.UpdateOneID(params.ID).SetDraw(Random(22)).Exec(ctx)
+}
+
 func main() {
 	url := os.Getenv("DATABASE_URL") + "?sslmode=require"
 	client, err := ent.Open("postgres", url)
@@ -44,7 +69,12 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
-	srv,err := ogent.NewServer(ogent.NewOgentHandler(client))
+	h := handler{
+		OgentHandler: ogent.NewOgentHandler(client),
+		client:       client,
+	}
+	srv,err := ogent.NewServer(h)
+	//srv,err := ogent.NewServer(ogent.NewOgentHandler(client))
 	if err != nil {
 		log.Fatal(err)
 	}

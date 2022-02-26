@@ -22,6 +22,7 @@ func init() {
 		fns := [...]func(string) error{
 			validators[0].(func(string) error),
 			validators[1].(func(string) error),
+			validators[2].(func(string) error),
 		}
 		return func(user string) error {
 			for _, fn := range fns {
@@ -32,12 +33,24 @@ func init() {
 			return nil
 		}
 	}()
+	// usersDescFirst is the schema descriptor for first field.
+	usersDescFirst := usersFields[1].Descriptor()
+	// users.DefaultFirst holds the default value on creation for the first field.
+	users.DefaultFirst = usersDescFirst.Default.(int)
+	// usersDescStart is the schema descriptor for start field.
+	usersDescStart := usersFields[2].Descriptor()
+	// users.DefaultStart holds the default value on creation for the start field.
+	users.DefaultStart = usersDescStart.Default.(bool)
+	// usersDescDraw is the schema descriptor for draw field.
+	usersDescDraw := usersFields[3].Descriptor()
+	// users.DefaultDraw holds the default value on creation for the draw field.
+	users.DefaultDraw = usersDescDraw.Default.(int)
 	// usersDescCreatedAt is the schema descriptor for created_at field.
-	usersDescCreatedAt := usersFields[3].Descriptor()
+	usersDescCreatedAt := usersFields[4].Descriptor()
 	// users.DefaultCreatedAt holds the default value on creation for the created_at field.
 	users.DefaultCreatedAt = usersDescCreatedAt.Default.(func() time.Time)
 	// usersDescUpdatedAt is the schema descriptor for updated_at field.
-	usersDescUpdatedAt := usersFields[4].Descriptor()
+	usersDescUpdatedAt := usersFields[5].Descriptor()
 	// users.DefaultUpdatedAt holds the default value on creation for the updated_at field.
 	users.DefaultUpdatedAt = usersDescUpdatedAt.Default.(func() time.Time)
 }

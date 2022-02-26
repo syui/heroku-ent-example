@@ -296,6 +296,16 @@ func encodeDeleteUsersResponse(response DeleteUsersRes, w http.ResponseWriter, s
 	}
 }
 
+func encodeDrawDoneResponse(response DrawDoneNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	return nil
+}
+
+func encodeDrawStartResponse(response DrawStartNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	return nil
+}
+
 func encodeListTodoResponse(response ListTodoRes, w http.ResponseWriter, span trace.Span) error {
 	switch response := response.(type) {
 	case *ListTodoOKApplicationJSON:
@@ -428,6 +438,11 @@ func encodeListUsersResponse(response ListUsersRes, w http.ResponseWriter, span 
 	default:
 		return errors.Errorf("/users"+`: unexpected response type: %T`, response)
 	}
+}
+
+func encodeMarkDoneResponse(response MarkDoneNoContent, w http.ResponseWriter, span trace.Span) error {
+	w.WriteHeader(204)
+	return nil
 }
 
 func encodeReadTodoResponse(response ReadTodoRes, w http.ResponseWriter, span trace.Span) error {

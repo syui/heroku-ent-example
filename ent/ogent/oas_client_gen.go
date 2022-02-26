@@ -337,6 +337,122 @@ func (c *Client) DeleteUsers(ctx context.Context, params DeleteUsersParams) (res
 	return result, nil
 }
 
+// DrawDone invokes drawDone operation.
+//
+// PATCH /users/{id}/d
+func (c *Client) DrawDone(ctx context.Context, params DrawDoneParams) (res DrawDoneNoContent, err error) {
+	startTime := time.Now()
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("drawDone"),
+	}
+	ctx, span := c.cfg.Tracer.Start(ctx, "DrawDone",
+		trace.WithAttributes(otelAttrs...),
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		} else {
+			elapsedDuration := time.Since(startTime)
+			c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		}
+		span.End()
+	}()
+	c.requests.Add(ctx, 1, otelAttrs...)
+	u := uri.Clone(c.serverURL)
+	u.Path += "/users/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.IntToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+	u.Path += "/d"
+
+	r := ht.NewRequest(ctx, "PATCH", u, nil)
+	defer ht.PutRequest(r)
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeDrawDoneResponse(resp, span)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// DrawStart invokes drawStart operation.
+//
+// PATCH /users/{id}/start
+func (c *Client) DrawStart(ctx context.Context, params DrawStartParams) (res DrawStartNoContent, err error) {
+	startTime := time.Now()
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("drawStart"),
+	}
+	ctx, span := c.cfg.Tracer.Start(ctx, "DrawStart",
+		trace.WithAttributes(otelAttrs...),
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		} else {
+			elapsedDuration := time.Since(startTime)
+			c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		}
+		span.End()
+	}()
+	c.requests.Add(ctx, 1, otelAttrs...)
+	u := uri.Clone(c.serverURL)
+	u.Path += "/users/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.IntToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+	u.Path += "/start"
+
+	r := ht.NewRequest(ctx, "PATCH", u, nil)
+	defer ht.PutRequest(r)
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeDrawStartResponse(resp, span)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
 // ListTodo invokes listTodo operation.
 //
 // List Todos.
@@ -490,6 +606,64 @@ func (c *Client) ListUsers(ctx context.Context, params ListUsersParams) (res Lis
 	defer resp.Body.Close()
 
 	result, err := decodeListUsersResponse(resp, span)
+	if err != nil {
+		return res, errors.Wrap(err, "decode response")
+	}
+
+	return result, nil
+}
+
+// MarkDone invokes markDone operation.
+//
+// PATCH /todos/{id}/done
+func (c *Client) MarkDone(ctx context.Context, params MarkDoneParams) (res MarkDoneNoContent, err error) {
+	startTime := time.Now()
+	otelAttrs := []attribute.KeyValue{
+		otelogen.OperationID("markDone"),
+	}
+	ctx, span := c.cfg.Tracer.Start(ctx, "MarkDone",
+		trace.WithAttributes(otelAttrs...),
+		trace.WithSpanKind(trace.SpanKindClient),
+	)
+	defer func() {
+		if err != nil {
+			span.RecordError(err)
+			c.errors.Add(ctx, 1, otelAttrs...)
+		} else {
+			elapsedDuration := time.Since(startTime)
+			c.duration.Record(ctx, elapsedDuration.Microseconds(), otelAttrs...)
+		}
+		span.End()
+	}()
+	c.requests.Add(ctx, 1, otelAttrs...)
+	u := uri.Clone(c.serverURL)
+	u.Path += "/todos/"
+	{
+		// Encode "id" parameter.
+		e := uri.NewPathEncoder(uri.PathEncoderConfig{
+			Param:   "id",
+			Style:   uri.PathStyleSimple,
+			Explode: false,
+		})
+		if err := func() error {
+			return e.EncodeValue(conv.IntToString(params.ID))
+		}(); err != nil {
+			return res, errors.Wrap(err, "encode path")
+		}
+		u.Path += e.Result()
+	}
+	u.Path += "/done"
+
+	r := ht.NewRequest(ctx, "PATCH", u, nil)
+	defer ht.PutRequest(r)
+
+	resp, err := c.cfg.Client.Do(r)
+	if err != nil {
+		return res, errors.Wrap(err, "do request")
+	}
+	defer resp.Body.Close()
+
+	result, err := decodeMarkDoneResponse(resp, span)
 	if err != nil {
 		return res, errors.Wrap(err, "decode response")
 	}

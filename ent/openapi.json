@@ -255,6 +255,31 @@
         }
       }
     },
+    "/todos/{id}/done": {
+      "description": "Mark an item as done",
+      "patch": {
+        "tags": [
+          "Todo"
+        ],
+        "summary": "Marks a todo item as done.",
+        "operationId": "markDone",
+        "responses": {
+          "204": {
+            "description": "Item marked as done"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "schema": {
+            "type": "integer"
+          },
+          "required": true
+        }
+      ]
+    },
     "/users": {
       "get": {
         "tags": [
@@ -328,6 +353,9 @@
                   },
                   "first": {
                     "type": "integer"
+                  },
+                  "start": {
+                    "type": "boolean"
                   },
                   "draw": {
                     "type": "integer"
@@ -477,8 +505,8 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "first": {
-                    "type": "integer"
+                  "start": {
+                    "type": "boolean"
                   },
                   "draw": {
                     "type": "integer"
@@ -522,6 +550,56 @@
           }
         }
       }
+    },
+    "/users/{id}/d": {
+      "description": "Start an draw as done",
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Draws a card item as done.",
+        "operationId": "drawDone",
+        "responses": {
+          "204": {
+            "description": "Item marked as done"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "schema": {
+            "type": "integer"
+          },
+          "required": true
+        }
+      ]
+    },
+    "/users/{id}/start": {
+      "description": "Start an draw as done",
+      "patch": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Draws a card item as done.",
+        "operationId": "drawStart",
+        "responses": {
+          "204": {
+            "description": "Item marked as done"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "schema": {
+            "type": "integer"
+          },
+          "required": true
+        }
+      ]
     }
   },
   "components": {
@@ -628,6 +706,9 @@
           "first": {
             "type": "integer"
           },
+          "start": {
+            "type": "boolean"
+          },
           "draw": {
             "type": "integer"
           },
@@ -656,6 +737,9 @@
           },
           "first": {
             "type": "integer"
+          },
+          "start": {
+            "type": "boolean"
           },
           "draw": {
             "type": "integer"
@@ -686,6 +770,9 @@
           "first": {
             "type": "integer"
           },
+          "start": {
+            "type": "boolean"
+          },
           "draw": {
             "type": "integer"
           },
@@ -715,6 +802,9 @@
           "first": {
             "type": "integer"
           },
+          "start": {
+            "type": "boolean"
+          },
           "draw": {
             "type": "integer"
           },
@@ -743,6 +833,9 @@
           },
           "first": {
             "type": "integer"
+          },
+          "start": {
+            "type": "boolean"
           },
           "draw": {
             "type": "integer"

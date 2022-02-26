@@ -204,6 +204,9 @@ func (h *OgentHandler) CreateUsers(ctx context.Context, req CreateUsersReq) (Cre
 	if v, ok := req.First.Get(); ok {
 		b.SetFirst(v)
 	}
+	if v, ok := req.Start.Get(); ok {
+		b.SetStart(v)
+	}
 	if v, ok := req.Draw.Get(); ok {
 		b.SetDraw(v)
 	}
@@ -275,8 +278,8 @@ func (h *OgentHandler) ReadUsers(ctx context.Context, params ReadUsersParams) (R
 func (h *OgentHandler) UpdateUsers(ctx context.Context, req UpdateUsersReq, params UpdateUsersParams) (UpdateUsersRes, error) {
 	b := h.client.Users.UpdateOneID(params.ID)
 	// Add all fields.
-	if v, ok := req.First.Get(); ok {
-		b.SetFirst(v)
+	if v, ok := req.Start.Get(); ok {
+		b.SetStart(v)
 	}
 	if v, ok := req.Draw.Get(); ok {
 		b.SetDraw(v)

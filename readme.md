@@ -25,3 +25,5 @@ ref :
 - https://github.com/go-kratos/beer-shop/tree/main/app/catalog/service/internal/data/ent
 
 - https://entgo.io/ja/blog/2022/02/15/generate-rest-crud-with-ent-and-ogen/
+
+- https://github.com/ariga/ogent/blob/main/example/todo/ent/entc.go

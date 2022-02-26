@@ -203,6 +203,15 @@ func (s CreateUsersReq) Encode(e *jx.Writer) {
 		}
 	}
 	{
+		if s.Start.Set {
+			e.Comma()
+		}
+		if s.Start.Set {
+			e.RawStr("\"start\"" + ":")
+			s.Start.Encode(e)
+		}
+	}
+	{
 		if s.Draw.Set {
 			e.Comma()
 		}
@@ -232,12 +241,13 @@ func (s CreateUsersReq) Encode(e *jx.Writer) {
 	e.ObjEnd()
 }
 
-var jsonFieldsNameOfCreateUsersReq = [5]string{
+var jsonFieldsNameOfCreateUsersReq = [6]string{
 	0: "user",
 	1: "first",
-	2: "draw",
-	3: "created_at",
-	4: "updated_at",
+	2: "start",
+	3: "draw",
+	4: "created_at",
+	5: "updated_at",
 }
 
 // Decode decodes CreateUsersReq from json.
@@ -270,6 +280,16 @@ func (s *CreateUsersReq) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"first\"")
+			}
+		case "start":
+			if err := func() error {
+				s.Start.Reset()
+				if err := s.Start.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start\"")
 			}
 		case "draw":
 			if err := func() error {
@@ -1622,15 +1642,15 @@ func (s UpdateUsersReq) Encode(e *jx.Writer) {
 		_     = first
 	)
 	{
-		if s.First.Set {
+		if s.Start.Set {
 			if !first {
 				e.Comma()
 			}
 			first = false
 		}
-		if s.First.Set {
-			e.RawStr("\"first\"" + ":")
-			s.First.Encode(e)
+		if s.Start.Set {
+			e.RawStr("\"start\"" + ":")
+			s.Start.Encode(e)
 		}
 	}
 	{
@@ -1673,7 +1693,7 @@ func (s UpdateUsersReq) Encode(e *jx.Writer) {
 }
 
 var jsonFieldsNameOfUpdateUsersReq = [4]string{
-	0: "first",
+	0: "start",
 	1: "draw",
 	2: "created_at",
 	3: "updated_at",
@@ -1687,15 +1707,15 @@ func (s *UpdateUsersReq) Decode(d *jx.Decoder) error {
 
 	if err := d.ObjBytes(func(d *jx.Decoder, k []byte) error {
 		switch string(k) {
-		case "first":
+		case "start":
 			if err := func() error {
-				s.First.Reset()
-				if err := s.First.Decode(d); err != nil {
+				s.Start.Reset()
+				if err := s.Start.Decode(d); err != nil {
 					return err
 				}
 				return nil
 			}(); err != nil {
-				return errors.Wrap(err, "decode field \"first\"")
+				return errors.Wrap(err, "decode field \"start\"")
 			}
 		case "draw":
 			if err := func() error {
@@ -1770,6 +1790,15 @@ func (s UsersCreate) Encode(e *jx.Writer) {
 		}
 	}
 	{
+		if s.Start.Set {
+			e.Comma()
+		}
+		if s.Start.Set {
+			e.RawStr("\"start\"" + ":")
+			s.Start.Encode(e)
+		}
+	}
+	{
 		if s.Draw.Set {
 			e.Comma()
 		}
@@ -1799,13 +1828,14 @@ func (s UsersCreate) Encode(e *jx.Writer) {
 	e.ObjEnd()
 }
 
-var jsonFieldsNameOfUsersCreate = [6]string{
+var jsonFieldsNameOfUsersCreate = [7]string{
 	0: "id",
 	1: "user",
 	2: "first",
-	3: "draw",
-	4: "created_at",
-	5: "updated_at",
+	3: "start",
+	4: "draw",
+	5: "created_at",
+	6: "updated_at",
 }
 
 // Decode decodes UsersCreate from json.
@@ -1850,6 +1880,16 @@ func (s *UsersCreate) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"first\"")
+			}
+		case "start":
+			if err := func() error {
+				s.Start.Reset()
+				if err := s.Start.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start\"")
 			}
 		case "draw":
 			if err := func() error {
@@ -1956,6 +1996,15 @@ func (s UsersList) Encode(e *jx.Writer) {
 		}
 	}
 	{
+		if s.Start.Set {
+			e.Comma()
+		}
+		if s.Start.Set {
+			e.RawStr("\"start\"" + ":")
+			s.Start.Encode(e)
+		}
+	}
+	{
 		if s.Draw.Set {
 			e.Comma()
 		}
@@ -1985,13 +2034,14 @@ func (s UsersList) Encode(e *jx.Writer) {
 	e.ObjEnd()
 }
 
-var jsonFieldsNameOfUsersList = [6]string{
+var jsonFieldsNameOfUsersList = [7]string{
 	0: "id",
 	1: "user",
 	2: "first",
-	3: "draw",
-	4: "created_at",
-	5: "updated_at",
+	3: "start",
+	4: "draw",
+	5: "created_at",
+	6: "updated_at",
 }
 
 // Decode decodes UsersList from json.
@@ -2036,6 +2086,16 @@ func (s *UsersList) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"first\"")
+			}
+		case "start":
+			if err := func() error {
+				s.Start.Reset()
+				if err := s.Start.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start\"")
 			}
 		case "draw":
 			if err := func() error {
@@ -2142,6 +2202,15 @@ func (s UsersRead) Encode(e *jx.Writer) {
 		}
 	}
 	{
+		if s.Start.Set {
+			e.Comma()
+		}
+		if s.Start.Set {
+			e.RawStr("\"start\"" + ":")
+			s.Start.Encode(e)
+		}
+	}
+	{
 		if s.Draw.Set {
 			e.Comma()
 		}
@@ -2171,13 +2240,14 @@ func (s UsersRead) Encode(e *jx.Writer) {
 	e.ObjEnd()
 }
 
-var jsonFieldsNameOfUsersRead = [6]string{
+var jsonFieldsNameOfUsersRead = [7]string{
 	0: "id",
 	1: "user",
 	2: "first",
-	3: "draw",
-	4: "created_at",
-	5: "updated_at",
+	3: "start",
+	4: "draw",
+	5: "created_at",
+	6: "updated_at",
 }
 
 // Decode decodes UsersRead from json.
@@ -2222,6 +2292,16 @@ func (s *UsersRead) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"first\"")
+			}
+		case "start":
+			if err := func() error {
+				s.Start.Reset()
+				if err := s.Start.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start\"")
 			}
 		case "draw":
 			if err := func() error {
@@ -2328,6 +2408,15 @@ func (s UsersUpdate) Encode(e *jx.Writer) {
 		}
 	}
 	{
+		if s.Start.Set {
+			e.Comma()
+		}
+		if s.Start.Set {
+			e.RawStr("\"start\"" + ":")
+			s.Start.Encode(e)
+		}
+	}
+	{
 		if s.Draw.Set {
 			e.Comma()
 		}
@@ -2357,13 +2446,14 @@ func (s UsersUpdate) Encode(e *jx.Writer) {
 	e.ObjEnd()
 }
 
-var jsonFieldsNameOfUsersUpdate = [6]string{
+var jsonFieldsNameOfUsersUpdate = [7]string{
 	0: "id",
 	1: "user",
 	2: "first",
-	3: "draw",
-	4: "created_at",
-	5: "updated_at",
+	3: "start",
+	4: "draw",
+	5: "created_at",
+	6: "updated_at",
 }
 
 // Decode decodes UsersUpdate from json.
@@ -2408,6 +2498,16 @@ func (s *UsersUpdate) Decode(d *jx.Decoder) error {
 				return nil
 			}(); err != nil {
 				return errors.Wrap(err, "decode field \"first\"")
+			}
+		case "start":
+			if err := func() error {
+				s.Start.Reset()
+				if err := s.Start.Decode(d); err != nil {
+					return err
+				}
+				return nil
+			}(); err != nil {
+				return errors.Wrap(err, "decode field \"start\"")
 			}
 		case "draw":
 			if err := func() error {

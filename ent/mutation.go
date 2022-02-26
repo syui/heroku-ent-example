@@ -424,6 +424,7 @@ type UsersMutation struct {
 	user          *string
 	first         *int
 	addfirst      *int
+	start         *bool
 	draw          *int
 	adddraw       *int
 	created_at    *time.Time
@@ -638,6 +639,55 @@ func (m *UsersMutation) ResetFirst() {
 	delete(m.clearedFields, users.FieldFirst)
 }
 
+// SetStart sets the "start" field.
+func (m *UsersMutation) SetStart(b bool) {
+	m.start = &b
+}
+
+// Start returns the value of the "start" field in the mutation.
+func (m *UsersMutation) Start() (r bool, exists bool) {
+	v := m.start
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldStart returns the old "start" field's value of the Users entity.
+// If the Users object wasn't provided to the builder, the object is fetched from the database.
+// An error is returned if the mutation operation is not UpdateOne, or the database query fails.
+func (m *UsersMutation) OldStart(ctx context.Context) (v bool, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, errors.New("OldStart is only allowed on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, errors.New("OldStart requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldStart: %w", err)
+	}
+	return oldValue.Start, nil
+}
+
+// ClearStart clears the value of the "start" field.
+func (m *UsersMutation) ClearStart() {
+	m.start = nil
+	m.clearedFields[users.FieldStart] = struct{}{}
+}
+
+// StartCleared returns if the "start" field was cleared in this mutation.
+func (m *UsersMutation) StartCleared() bool {
+	_, ok := m.clearedFields[users.FieldStart]
+	return ok
+}
+
+// ResetStart resets all changes to the "start" field.
+func (m *UsersMutation) ResetStart() {
+	m.start = nil
+	delete(m.clearedFields, users.FieldStart)
+}
+
 // SetDraw sets the "draw" field.
 func (m *UsersMutation) SetDraw(i int) {
 	m.draw = &i
@@ -825,12 +875,15 @@ func (m *UsersMutation) Type() string {
 // order to get all numeric fields that were incremented/decremented, call
 // AddedFields().
 func (m *UsersMutation) Fields() []string {
-	fields := make([]string, 0, 5)
+	fields := make([]string, 0, 6)
 	if m.user != nil {
 		fields = append(fields, users.FieldUser)
 	}
 	if m.first != nil {
 		fields = append(fields, users.FieldFirst)
+	}
+	if m.start != nil {
+		fields = append(fields, users.FieldStart)
 	}
 	if m.draw != nil {
 		fields = append(fields, users.FieldDraw)
@@ -853,6 +906,8 @@ func (m *UsersMutation) Field(name string) (ent.Value, bool) {
 		return m.User()
 	case users.FieldFirst:
 		return m.First()
+	case users.FieldStart:
+		return m.Start()
 	case users.FieldDraw:
 		return m.Draw()
 	case users.FieldCreatedAt:
@@ -872,6 +927,8 @@ func (m *UsersMutation) OldField(ctx context.Context, name string) (ent.Value, e
 		return m.OldUser(ctx)
 	case users.FieldFirst:
 		return m.OldFirst(ctx)
+	case users.FieldStart:
+		return m.OldStart(ctx)
 	case users.FieldDraw:
 		return m.OldDraw(ctx)
 	case users.FieldCreatedAt:
@@ -900,6 +957,13 @@ func (m *UsersMutation) SetField(name string, value ent.Value) error {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetFirst(v)
+		return nil
+	case users.FieldStart:
+		v, ok := value.(bool)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetStart(v)
 		return nil
 	case users.FieldDraw:
 		v, ok := value.(int)
@@ -982,6 +1046,9 @@ func (m *UsersMutation) ClearedFields() []string {
 	if m.FieldCleared(users.FieldFirst) {
 		fields = append(fields, users.FieldFirst)
 	}
+	if m.FieldCleared(users.FieldStart) {
+		fields = append(fields, users.FieldStart)
+	}
 	if m.FieldCleared(users.FieldDraw) {
 		fields = append(fields, users.FieldDraw)
 	}
@@ -1008,6 +1075,9 @@ func (m *UsersMutation) ClearField(name string) error {
 	case users.FieldFirst:
 		m.ClearFirst()
 		return nil
+	case users.FieldStart:
+		m.ClearStart()
+		return nil
 	case users.FieldDraw:
 		m.ClearDraw()
 		return nil
@@ -1030,6 +1100,9 @@ func (m *UsersMutation) ResetField(name string) error {
 		return nil
 	case users.FieldFirst:
 		m.ResetFirst()
+		return nil
+	case users.FieldStart:
+		m.ResetStart()
 		return nil
 	case users.FieldDraw:
 		m.ResetDraw()
