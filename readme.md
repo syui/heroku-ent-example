@@ -16,6 +16,11 @@ $ heroku logs
 
 ```sh
 $ curl https://$APP.herokuapp.com/users/1
+{"user":"syui", "draw":1}
+
+# card draw
+$ curl https://$APP.herokuapp.com/users/1/d
+{"user":"syui", "draw":2}
 ```
 
 ref : 
